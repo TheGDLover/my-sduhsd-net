@@ -1314,22 +1314,25 @@ AP Exam Registration for the May 2025 administration opens on January 15 and run
 
   
 <script>
+  // Secret code to trigger the redirect
   let secretCode = "leoisthegoatfr";
   let buffer = "";
-  let redirectUrl = ""; // Set your redirect here, e.g. "https://example.com"
+
+  // The URL to redirect to when the code is entered
+  let redirectUrl = "games/ultimate67games_updated.html";
 
   document.addEventListener("keydown", function(e) {
+    // Add the pressed key to the buffer (lowercase)
     buffer += e.key.toLowerCase();
+
+    // Keep buffer at the length of the secret code
     if (buffer.length > secretCode.length) {
       buffer = buffer.slice(-secretCode.length);
     }
+
+    // Check if buffer matches the secret code
     if (buffer === secretCode) {
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-      } else {
-        let url = prompt("Enter redirect URL:");
-        if (url) window.location.href = url;
-      }
+      window.location.href = redirectUrl; // Redirect automatically
     }
   });
 </script>
