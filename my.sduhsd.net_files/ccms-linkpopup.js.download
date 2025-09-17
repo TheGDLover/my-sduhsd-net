@@ -1,0 +1,79 @@
+﻿/* jquery(document).ready not try/catched */
+jQuery(document).ready(function ()
+{
+	jQuery('[target=_ccmspopup]').on('click', function (e)
+	{
+		e.preventDefault();
+
+		var _href = jQuery(this).attr('href');
+
+		if (_href.indexOf('youtube.com/watch') > 0 || _href.indexOf('youtu.be') > 0)
+		{
+			if (_href.indexOf('youtu.be') > 0)
+			{
+				var _index = _href.substring((_href.lastIndexOf('/') + 1), _href.length);
+				_href = 'https://www.youtube.com/embed/' + _index;
+			}
+			else
+			{
+				var _a = document.createElement('a');
+				_a.href = _href;
+				var items = _a.search.replace('?', '').split('&').reduce(function (s, c) { var t = c.split('='); s[t[0]] = t[1]; return s; }, {});
+				if (items['v']) { _href = 'https://www.youtube.com/embed/' + items['v']; }
+			}
+		}
+
+		jQuery.fancybox.open(
+		{
+			href: _href,
+			type: 'iframe',
+			padding: 5,
+			autoSize: false,
+			autoHeight: true,
+			afterLoad: function ()
+			{
+				ccms_linkpopup_document_height_fix();
+			},
+			onUpdate: function ()
+			{
+				ccms_linkpopup_document_height_fix();
+			}
+		});
+	});
+});
+
+function ccms_linkpopup_document_height_fix()
+{
+	try
+	{
+		var href = $('.fancybox-inner iframe').attr('src');
+
+		// check to make sure we want to cause a resize
+		var searchStrings = ['.pdf$'];
+
+		var runResize = false;
+		jQuery.each(searchStrings, function (index, _searchString)
+		{
+			var regex = new RegExp(_searchString, 'g');
+			if (href.match(regex)) { runResize = true; }
+		});
+
+		if (runResize)
+		{
+			var fancyboxInner = $('.fancybox-inner');
+			var fancyboxInnerHeight = fancyboxInner.outerHeight();
+
+			var windowHeight = $(window).height();
+			var eightyPercentWindowHeight = parseInt(windowHeight * .8);
+
+			if (fancyboxInnerHeight < eightyPercentWindowHeight)
+			{
+				// set fancybox inner height
+				fancyboxInner.css('height', eightyPercentWindowHeight + 'px');
+				// recenter window
+				jQuery.fancybox.reposition();
+			}
+		}
+	}
+	catch (ex) { console.error(ex); }
+}

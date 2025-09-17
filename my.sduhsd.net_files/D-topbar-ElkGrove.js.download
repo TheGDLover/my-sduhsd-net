@@ -1,0 +1,675 @@
+// 25-02-12
+
+function slickOverflow() {
+  $(this).find('.dropdown-toggle > i').toggleClass('fa-angle-down fa-angle-up');
+  const currentSlickListOverflow = $('.top-bar .slick-list').css('overflow');
+  if (currentSlickListOverflow === 'visible') {
+    $('.top-bar .slick-list').css({ overflow: '', zIndex: '' });
+  }
+  else if (currentSlickListOverflow === 'hidden') {
+    $('.top-bar .slick-list').css({ overflow: 'visible', zIndex: '1000' });
+  }
+}
+
+// Remove empty links
+function RemoveEmptyLinks() {
+  try {
+    elementEmptyCheck($('.top-bar-link'), undefined);
+  }
+  catch (error) {
+    console.log(error);
+  }
+}
+
+// Loads quicklinks from the quicklinks page into the quicklinks dropdown
+function LoadQuicklinks() {
+  try {
+    $('.top-bar-link.quicklinks-top-bar-link .dropdown-menu').load('Quicklinks/index.html #container ul li a', function () {
+      $(this).find('a').addClass('dropdown-item');
+    });
+  }
+  catch (ex) {
+    console.log('Quicklinks missing.');
+  }
+}
+
+// Contrast Button
+$(".topbar-contrast-button").click(function () {
+  $(".topbar-contrast-button").toggleClass("high");
+});
+
+$('.topbar-contrast-button').on('keydown', function (event) {
+  if (event.which === 32 || event.which === 13) {
+    $(".topbar-contrast-button").toggleClass("high");
+  }
+});
+
+// Schools dropdown categories
+const schoolsDropdown = $('.schools-dropdown');
+const elementarySchools = $('.schools-dropdown .Elementary');
+const middleSchools = $('.schools-dropdown .Middle');
+const highSchools = $('.schools-dropdown .High');
+const adultSchools = $('.schools-dropdown .Adult');
+const otherSchools = $('.schools-dropdown .Other');
+const districtOffice = $('.schools-dropdown .District');
+// const remainingSchools = ('.schools-dropdown .dropdown-item');
+
+function GroupSchools() {
+  try {
+    $(elementarySchools).wrapAll('<div class="elementary-schools col" />');
+    $(middleSchools).wrapAll('<div class="middle-schools col" />');
+    $(highSchools).wrapAll('<div class="high-schools col" />');
+    $(adultSchools).wrapAll('<div class="adult-schools col" />');
+    $(otherSchools).wrapAll('<div class="other-schools col" />');
+    $(districtOffice).wrapAll('<div class="district-office" />');
+    $(districtOffice).hide();
+    $('.elementary-schools').add('.middle-schools').add('.high-schools').add('.adult-schools').add('.other-schools').wrapAll('<div class="row row-cols-1 row-cols-lg-auto" />');
+
+    const theSchoolsDropdown = $('.schools-dropdown .dropdown-menu');
+    const elementarySchoolsColumn = $('.schools-dropdown .dropdown-menu .row .elementary-schools');
+    const middleSchoolsColumn = $('.schools-dropdown .dropdown-menu .row .middle-schools');
+    const highSchoolsColumn = $('.schools-dropdown .dropdown-menu .row .high-schools');
+    const adultSchoolsColumn = $('.schools-dropdown .dropdown-menu .row .adult-schools');
+    const otherSchoolsColumn = $('.schools-dropdown .dropdown-menu .row .other-schools');
+
+    $(elementarySchoolsColumn).after($('.schools-dropdown .dropdown-menu .row .middle-schools'));
+    $(middleSchoolsColumn).after($('.schools-dropdown .dropdown-menu .row .high-schools'));
+    $(highSchoolsColumn).after($('.schools-dropdown .dropdown-menu .row .adult-schools'));
+    $(adultSchoolsColumn).after($('.schools-dropdown .dropdown-menu .row .other-schools'));
+
+    $(elementarySchoolsColumn).prepend('<div class="school-dropdown-title">Elementary Schools</div>');
+    $(middleSchoolsColumn).prepend('<div class="school-dropdown-title">Middle Schools</div>');
+    $(highSchoolsColumn).prepend('<div class="school-dropdown-title">High Schools</div>');
+    $(adultSchoolsColumn).prepend('<div class="school-dropdown-title">Adult Schools</div>');
+    $(otherSchoolsColumn).prepend('<div class="school-dropdown-title">Independent Study</div>');
+
+    // $(theSchoolsDropdown).show();
+    // const elementaryWidth = $('.schools-dropdown .dropdown-menu .row .elementary-schools').outerWidth();
+    // const middleWidth = $('.schools-dropdown .dropdown-menu .row .middle-schools').outerWidth();
+    // const highWidth = $('.schools-dropdown .dropdown-menu .row .high-schools').outerWidth();
+    // const adultWidth = $('.schools-dropdown .dropdown-menu .row .adult-schools').outerWidth();
+    // const otherWidth = $('.schools-dropdown .dropdown-menu .row .other-schools').outerWidth();
+    // const schoolsDropdownWidth = elementaryWidth + middleWidth + highWidth + adultWidth + otherWidth;
+
+    // let dropdownOffset = $(window).width() - schoolsDropdownWidth - 12;
+    // let arrowOffset = $(theSchoolsDropdown).offset().left;
+    // if ($(theSchoolsDropdown).offset().left + schoolsDropdownWidth - $(window).scrollLeft() >= $(window).width()) {
+    //   $(theSchoolsDropdown).addClass('went-off-right');
+    //   $(theSchoolsDropdown).offset({ left: dropdownOffset });
+    //   $(theSchoolsDropdown).children('i').offset({ left: arrowOffset });
+    // }
+
+    // else {
+    //   $(theSchoolsDropdown).removeClass('went-off-right');
+    //   $(theSchoolsDropdown).css('left', '');
+    //   $(theSchoolsDropdown).children('i').css('left', '');
+    // }
+    // $(theSchoolsDropdown).css('display', '');
+
+  } catch (error) {
+
+  }
+}
+
+// Switches the schools dropdown from standard to search
+function SchoolsDropdownSearch() {
+  try {
+    $('.schools-dropdown-no-search').hide();
+    $('.schools-dropdown.with-search').removeClass('d-none');
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+// Switches the schools dropdown to a quicklinks dropdown
+function SchoolsDropdownQuicklinks() {
+  try {
+    $('.schools-dropdown-no-search').hide();
+    $('.schools-dropdown.with-search').removeClass('d-none');
+    $('.our-schools-dropdown-row').removeClass('row-cols-lg-2');
+    $('.our-schools-search-column').hide();
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+function SchoolsDropdownNone() {
+  try {
+    $('.schools-dropdown-no-search').hide();
+    $('.schools-dropdown.with-search').hide();
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+let schoolDropdownFunction = () => { };
+let schoolDropdownTypeLet;
+
+if (typeof schoolDropdownType === 'undefined' || !schoolDropdownType) {
+  schoolDropdownTypeLet = schoolDropdownTypes.Standard;
+}
+else {
+  schoolDropdownTypeLet = schoolDropdownType;
+}
+
+// School dropdown versions
+function SchoolDropdownType() {
+  try {
+    switch (schoolDropdownTypeLet) {
+      case schoolDropdownTypes.StandardGrouped:
+        schoolDropdownFunction = GroupSchools;
+        break;
+      case schoolDropdownTypes.Search:
+        schoolDropdownFunction = SchoolsDropdownSearch;
+        break;
+      case schoolDropdownTypes.Quicklinks:
+        typeof ourSchoolsDropdownText === 'undefined' && $('.schools-dropdown .dropdown-toggle > .our-schools-text').text('Quicklinks');
+        schoolDropdownFunction = SchoolsDropdownQuicklinks;
+        break;
+      case schoolDropdownTypes.None:
+        schoolDropdownFunction = SchoolsDropdownNone;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+
+}
+
+// Change the text of the our schools dropdown
+function changeOurSchoolsDropdownText() {
+  try {
+    if (typeof ourSchoolsDropdownText !== 'undefined' && ourSchoolsDropdownText) {
+      $('.schools-dropdown .dropdown-toggle > .our-schools-text').text(ourSchoolsDropdownText);
+    }
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+
+// Over ten items in a menu makes a new column
+let dropdownsToWrap = $('.translate-dropdown .dropdown-wrap');
+let numberOfItemsInAColumn = 10;
+let groupCounter = 0;
+
+function WrapDropdowns() {
+  $(dropdownsToWrap).each(function (index) {
+    let anchors = $(this).find('a');
+    let numberOfItems = $(anchors).length;
+    // if (numberOfItems > numberOfItemsInAColumn && $(window).width() < 768) {
+    //   numberOfItemsInAColumn = Math.ceil(numberOfItems / 2);
+    // }
+
+    $(anchors).addClass('menu-' + index);
+    $(anchors).wrapAll('<div class="row" />');
+
+    if (numberOfItems > numberOfItemsInAColumn) {
+      $(this).addClass('too-many-items');
+    }
+
+    $(anchors).each(function (index) {
+      $(this).addClass('group-' + groupCounter);
+
+      if ((index + 1) % numberOfItemsInAColumn === 0 && index !== 0) {
+        groupCounter++;
+      }
+    });
+
+    for (let i = 0; i <= groupCounter; i++) {
+      if ($(this).hasClass('too-many-items')) {
+        $('.menu-' + index + '.group-' + i).wrapAll('<div class = "col-12 col-lg-auto px-md-3" />');
+      }
+
+      else {
+        $('.menu-' + index + '.group-' + i).wrapAll('<div class = "col-12 px-md-3" />');
+      }
+    }
+  });
+}
+
+// Checks if any of the dropdowns go off of the screen to the right and adds a class to them and moves them back on the screen
+let dropdowns = $('.more-dropdown .dropdown-menu');
+let dropdownOffset;
+let arrowOffset;
+
+function MoveOffscreenDropdowns() {
+  $(dropdowns).each(function () {
+    $(this).show();
+    dropdownOffset = $(window).width() - ( $(this).outerWidth() / 2);
+    // arrowOffset = $(this).offset().left;
+    if ($(this).is(':off-right') && !$(this).hasClass('main-nav-dropdown')) {
+      $(this).addClass('went-off-right');
+      $(this).offset({ left: dropdownOffset });
+      // $(this).children('i').offset({ left: arrowOffset });
+    }
+
+    else {
+      $(this).removeClass('went-off-right');
+      $(this).css('left', '');
+      // $(this).children('i').css('left', '');
+    }
+    $(this).css('display', '');
+  });
+
+  // $('.dropdown-menu.main-nav-dropdown').removeClass('went-off-right');
+}
+
+// Sets padding-top of the banner equal to the height of the top-bar because of the top-bar being absolutely positioned.
+let topBar = $('.top-bar');
+let nTopBarV3Height;
+let underTopBarNav = $('.under-top-bar-nav');
+let underTopBarNavHeight;
+let banner = $('.banner');
+let subPageHighTraffic = $('.high-traffic-icon-subpage-container');
+let underBannerUtility = $('.under-banner-utility');
+let navPlaceholder = $('.nav-placeholder');
+
+function setHeaderPadding() {
+  try {
+    let topBarHeaderHeight = $('.top-bar-header').height();
+
+    // if ($(window).width() > 992) {
+      $('header').css('margin-top', topBarHeaderHeight + 10);
+    // } else {
+    //   $('header').css('padding-top', '');
+    // }
+
+  } catch (error) { }
+}
+
+function SetSubHighTrafficTopPadding() {
+  nTopBarV3Height = $(topBar).height();
+  underTopBarNavHeight = $(underTopBarNav).height();
+
+  if ($(topBar).css('position') === 'fixed' && !$('.nav-placeholder').exists()) {
+    $(subPageHighTraffic).css('padding-top', '');
+
+    if ($('.banner').exists()) {
+      $(underBannerUtility).css('padding-top', '');
+    }
+
+    else {
+      $(underBannerUtility).css('padding-top', nTopBarV3Height + 2);
+    }
+  }
+
+  else if ($(topBar).css('position') !== 'fixed' && !$('.nav-placeholder').exists()) {
+    if (isMobile()) {
+      $(subPageHighTraffic).css('padding-top', underTopBarNavHeight);
+    }
+
+    else {
+      $(subPageHighTraffic).css('padding-top', '');
+    }
+  }
+
+  else if ($(topBar).css('position') !== 'fixed' && $('.nav-placeholder').exists()) {
+    $(navPlaceholder).height(underTopBarNavHeight);
+  }
+}
+
+$(".mobile-search-button").click(function () {
+
+  if ($(".top-bar > .container .search-field form#siteSearchForm input#siteSearchInput").css('display') == 'none') {
+
+    $('.site-search-field > .search-field').show();
+    $('.mobile-search-icon').toggleClass('fa-magnifying-glass fa-x');
+    $(".top-bar > .container .search-field form#siteSearchForm input#siteSearchInput").fadeToggle();
+  }
+  else {
+
+    $('.mobile-search-icon').toggleClass('fa-magnifying-glass fa-x');
+    $(".top-bar > .container .search-field form#siteSearchForm input#siteSearchInput").fadeToggle(function () {
+      $('.site-search-field > .search-field').hide();
+    });
+  }
+});
+
+const windowWidthWasDesktop = $(window).width() > 992;
+
+function topBarSlick() {
+  try {
+
+    if ($(window).width() <= 992) {
+      let numberOfSlides = 0;
+      let numberOfSlidesToScroll = 0;
+      let numberOfSlidesToShow = 0;
+      let goingBackwards = false;
+      // windowWidthWasDesktop && $('.site-search-field > .search-field').hide();
+      // windowWidthWasDesktop && $(".top-bar > .container > .top-bar-grid .search-field form#siteSearchForm input#siteSearchInput").hide();
+      $('.site-search-field').hasClass('top-bar-mobile') || $('.top-bar > .container.g-0').prepend($('.site-search-field'));
+      $('.site-search-field > .search-field').hide();
+      $(".top-bar > .container > .top-bar-grid .search-field form#siteSearchForm input#siteSearchInput").hide();
+      // $('.site-search-field').hasClass('top-bar-mobile') || $('.top-bar').prepend($('.top-bar > .container > .top-bar-grid > .site-search-field'));
+      $('.top-bar > .container > .top-bar-grid').on('init', function (slick) {
+        // $('.top-bar > .container > .top-bar-grid > .slick-list > .slick-track').addClass('row');
+        numberOfSlides = $('.top-bar > .container > .top-bar-grid > .slick-list > .slick-track .slick-slide').length;
+      });
+      if ($('.top-bar-link').not('.site-search-field').length % 2 != 0) {
+        $('.top-bar > .container > .top-bar-grid').append('<div class="top-bar-link"></div>');
+      }
+      $('.top-bar-grid').not('.slick-initialized').slick({
+        dots: false,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 3,
+        slidesToScroll: 2,
+        swipe: true,
+        variableWidth: true,
+        autoplay: false,
+        prevArrow: '<button type="button" class="slick-prev"><span class="ada">Previous</span></button>',
+        nextArrow: '<button type="button" class="slick-next"><span class="ada">Next</span></button>',
+      });
+      // $('.site-search-field').hasClass('top-bar-mobile') || $('.top-bar > .container').prepend($('.site-search-field'));
+      $('.site-search-field').hasClass('top-bar-mobile') || $('.site-search-field').addClass('top-bar-mobile');
+      numberOfSlidesToScroll = $('.top-bar > .container > .top-bar-grid').slick('slickGetOption', "slidesToScroll");
+      numberOfSlidesToShow = $('.top-bar > .container > .top-bar-grid').slick('slickGetOption', "slidesToShow");
+      $('.top-bar > .container > .top-bar-grid').on('beforeChange', function (event, slick, currentSlide, nextSlide) {
+        // console.log(`Current Slide: ${currentSlide}`);
+        // console.log(`Next Slide: ${nextSlide}`);
+        // console.log(`Number of slides: ${numberOfSlides}`);
+        // console.log(`Number of slides to scroll: ${$('.top-bar > .container-fluid > .top-bar-grid').slick('slickGetOption', "slidesToScroll")}`);
+
+
+
+        if (nextSlide < currentSlide && nextSlide != 0) {
+          goingBackwards = true;
+          $('.top-bar > .container > .top-bar-grid > .slick-next').hide();
+          $('.top-bar > .container > .top-bar-grid > .slick-prev').show();
+        }
+        else if ((numberOfSlides - nextSlide) - 1 === numberOfSlidesToShow) {
+          $('.top-bar > .container > .top-bar-grid').slick('slickSetOption', "slidesToScroll", 1);
+          $('.top-bar > .container > .top-bar-grid > .slick-next').show();
+          $('.top-bar > .container > .top-bar-grid > .slick-prev').hide();
+        }
+        else if (nextSlide > currentSlide && nextSlide != (numberOfSlides - numberOfSlidesToScroll) - 1) {
+          goingBackwards = false;
+          $('.top-bar > .container > .top-bar-grid > .slick-next').show();
+          $('.top-bar > .container > .top-bar-grid > .slick-prev').hide();
+        }
+        else if (nextSlide === 0) {
+          $('.top-bar > .container > .top-bar-grid > .slick-next').show();
+        }
+        else {
+          $('.top-bar > .container > .top-bar-grid > .slick-prev').show();
+        }
+
+
+
+      });
+
+      $('.top-bar > .container > .top-bar-grid').on('afterChange', function (event, slick, currentSlide) {
+        // console.log(`After Change Current Slide: ${currentSlide}`);
+
+
+        if (numberOfSlides - currentSlide === numberOfSlidesToShow) {
+          $('.top-bar > .container > .top-bar-grid').slick('slickSetOption', "slidesToScroll", 3);
+        }
+        else if (goingBackwards) {
+          $('.top-bar > .container > .top-bar-grid').slick('slickSetOption', "slidesToScroll", 2);
+        }
+        // console.log(`After Change Number of slides to scroll: ${$('.top-bar > .container > .top-bar-grid').slick('slickGetOption', "slidesToScroll")}`);
+      });
+    }
+
+    else {
+      $('.mobile-search-icon').removeClass('fa-x');
+      $('.mobile-search-icon').addClass('fa-magnifying-glass');
+      $('.site-search-field > .search-field').show();
+      $(".top-bar > .container > .top-bar-grid .search-field form#siteSearchForm input#siteSearchInput").show();
+      $('.top-bar > .container > .top-bar-grid .site-search-field').css('width', '');
+      $('.top-bar > .container > .top-bar-grid .site-search-field').css('left', '');
+      $('.top-bar > .container > .top-bar-grid').on('destroy', function (event, slick) {
+        $('.site-search-field').hasClass('top-bar-mobile') && $('.top-bar > .container > .top-bar-grid').append($('.top-bar > .container.g-0 > .site-search-field'));
+        $('.site-search-field').removeClass('top-bar-mobile');
+      });
+      $('.top-bar-grid.slick-initialized').slick('unslick');
+      $('.top-bar > .container > .top-bar-grid').hasClass('slick-initialized') && $('.top-bar > .container > .top-bar-grid').slick('unslick');
+    }
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+const topBarLinkDropdowns = $('.top-bar-link .dropdown');
+
+$(topBarLinkDropdowns).on('show.bs.dropdown', function () {
+  $(this).find('.dropdown-toggle > i').toggleClass('fa-angle-down fa-angle-up');
+  $('.top-bar .slick-list').css('overflow', 'visible');
+  $('.top-bar .slick-list').css('z-index', '1000');
+  $('.top-bar .navbar-toggler').css('z-index', '1');
+});
+
+$(topBarLinkDropdowns).on('hide.bs.dropdown', function () {
+  $(this).find('.dropdown-toggle > i').toggleClass('fa-angle-down fa-angle-up');
+  $('.top-bar .slick-list').css('overflow', '');
+  $('.top-bar .slick-list').css('z-index', '');
+  $('.top-bar .navbar-toggler').css('z-index', '');
+});
+
+// function useLegacyGoogleTranslate() {
+//   try
+//   {
+//     $('.goog-te-menu-frame').attr('id', 'googleTranslateWidget')
+//     let iframe = document.getElementById("googleTranslateWidget");
+//     let element = iframe?.contentWindow?.document.getElementsByClassName("goog-te-menu2")[0];
+//     const translateInterval = setInterval(MoveTranslateFunction, 100);
+//     function MoveTranslateFunction() {
+//       if(element)
+//       {
+//         $('#translateDropdownMenu').find('.dropdown-item').remove();
+//         $(element).find('a').appendTo('#translateDropdownMenu');
+//         $('#translateDropdownMenu a:first-child').hide();
+
+//         if($(window).width() > 992 && $(window).width() < 1500)
+//         {
+//           WrapDropdowns(20);
+//         }
+//         else
+//         {
+//           WrapDropdowns();
+//         }
+
+//         if($(window).width() < 992)
+//         {
+//           $('#translateDropdownMenu').css('width', 'auto');
+//         }
+//         else
+//         {
+//           MoveOffscreenDropdowns();
+//         }
+//         clearInterval(translateInterval);
+//       }
+//       else
+//       {
+//         $('.goog-te-menu-frame').attr('id', 'googleTranslateWidget')
+//         iframe = document.getElementById("googleTranslateWidget");
+//         element = iframe?.contentWindow?.document.getElementsByClassName("goog-te-menu2")[0];
+//       }
+//     }
+//   }
+
+//   catch (error)
+//   {
+//     console.log(error);
+//   }
+// }
+
+// $(document).ready(function () {
+//   if(typeof useTranslateWidget !== 'undefined' && useTranslateWidget)
+//   {
+//     useLegacyGoogleTranslate();
+//   }
+//   else
+//   {
+//     WrapDropdowns();
+//     if($(window).width() > 992)
+//     {
+//       MoveOffscreenDropdowns();
+//     }
+
+//     else
+//     {
+//       $('#translateDropdownMenu').css('width', 'auto');
+//     }
+//   }
+// });
+
+// Our Schools Dropdown Search
+function FindASchoolEnterEvent() {
+  try {
+    const findASchoolInput = document.getElementById('findASchoolInput');
+    const findASchoolSubmitButton = document.getElementById('findASchoolSubmitButton');
+    findASchoolInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        findASchoolSubmitButton.click();
+      }
+    });
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+function FindASchool() {
+  try {
+    const protocol = window.location.protocol;
+    const hostName = window.location.hostname;
+    const path = window.location.pathname;
+    const findASchoolInput = document.getElementById('findASchoolInput');
+    const findASchoolText = findASchoolInput.value;
+    const isStagingURL = hostName.includes('staging') && hostName.includes('catapultcms.com');
+    const pathParts = path.split('/');
+    const firstPathPart = isStagingURL ? pathParts[1] + '/' : '';
+    let schoolsPageLink = $('.browse-schools-link').attr('href').replace('/index.html', '');
+    if (schoolsPageLink.endsWith('/')) {
+      schoolsPageLink = schoolsPageLink.substring(0, schoolsPageLink.length - 1);
+    }
+    const schoolsPageLinkExists = schoolsPageLink.trim() === "<catapultcms name='schools-page-link' />" ? false : true;
+    const findASchoolURL = schoolsPageLinkExists ? `${schoolsPageLink}#/?csm_search=${findASchoolText}` : `${protocol}//${hostName}/${firstPathPart}our-schools#/?csm_search=${findASchoolText}`;
+    window.location.assign(findASchoolURL);
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+const currentUrl = $('.current-page-url').text().trim();
+
+function goHome() {
+  try {
+    if (typeof openTranslateInNewWindow !== 'undefined' && openTranslateInNewWindow) {
+      window.open(currentUrl);
+    }
+    else {
+      top.location.href = currentUrl;
+    }
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+function languageChange(id) {
+  try {
+    const translateUrl = 'https://translate.google.com/translate?u=' + currentUrl + '&sl=en&tl=' + id +
+      '&hl=&ie=UTF-8&anno=0';
+    if (typeof openTranslateInNewWindow !== 'undefined' && openTranslateInNewWindow) {
+      window.open(translateUrl);
+    }
+    else {
+      top.location.href = translateUrl;
+    }
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+// Quicklinks inside our schools dropdown
+// Adds Font Awesome Bullets to quicklinks
+const topBarFontAwesomeQuicklinksBullets = function() {
+  try {
+    $('.our-schools-quicklinks > ul').addClass('fa-ul row row-cols-2 row-cols-lg-3');
+    $('.our-schools-quicklinks > ul > li').addClass('col');
+    // $('.top-bar-link > .dropdown > .dropdown-toggle').append('<i class="fa-thin fa-angle-down"></i>');
+    if (useDiamonds) {
+      $('.our-schools-quicklinks > ul > li').prepend('<span class="fa-li"><i class="fas fa-diamond"></i></span>');
+    }
+    else {
+      $('.our-schools-quicklinks > ul > li').prepend('<span class="fa-li"><i class="fa fa-angle-right"></i></span>');
+    }
+  }
+  catch (error) {
+    console.log('Top Bar Quicklinks font awesome bullets did not work');
+  }
+}
+
+// Loads quicklinks from the quicklinks page into the find a school dropdown
+function findASchoolQuicklinks() {
+	if (useOurSchoolsQuicklinks === true) {
+	  try {
+
+		$('.our-schools-quicklinks').load('Quicklinks/index.html #container ul', function() {
+		  topBarFontAwesomeQuicklinksBullets();
+		});
+	  }
+	  catch (ex) {
+		console.log('Top Bar Quicklinks missing.');
+	  }
+	}
+}
+
+function tabIndexUpdate() {
+	try {
+		$('.top-bar-link.slick-slide').attr('tabindex', '-1');
+		$('.top-bar-link.slick-slide .no-dropdown a').attr('tabindex', '0');
+		$('.top-bar-link.slick-slide .dropdown a').attr('tabindex', '0');
+	} catch(error) {
+		console.log(error);
+	}
+}
+
+$(document).ready(function () {
+  changeOurSchoolsDropdownText();
+  SchoolDropdownType();
+  schoolDropdownFunction();
+  LoadQuicklinks();
+  WrapDropdowns();
+  RemoveEmptyLinks();
+  topBarSlick();
+  MoveOffscreenDropdowns();
+  findASchoolQuicklinks();
+  FindASchoolEnterEvent();
+  tabIndexUpdate();
+});
+
+$(window).debouncedResize(function () {
+  topBarSlick();
+});
+
+setTimeout(() => {
+    $('.top-bar-link').removeAttr('aria-describedby');
+}, 1000);
+

@@ -1,0 +1,272 @@
+/*Section Container for Picture Element*/
+section.ccms-picture {
+    position: relative;
+    margin:auto;
+    overflow: hidden;
+}
+
+/*Shade Inactive Elements*/
+
+section.ccms-picture.active:before {
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: 100%;
+    top: -9999px;
+    left: -9999px;
+    right: -9999px;
+    background: rgba(0,0,0,.5);
+}
+
+section.ccms-picture.active:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 100%;
+    bottom: -9999px;
+    left: -9999px;
+    right: -9999px;
+    background: rgba(0,0,0,.5);
+    clear: both;
+}
+
+section.ccms-picture.active .row:before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 100%;
+    right: -9999px;
+    top: 0px;
+    bottom: 0px;
+    background: rgba(0,0,0,.5);
+}
+
+section.ccms-picture.active .row:after {
+    content: "";
+    display: block;
+    position: absolute;
+    right: 100%;
+    left: -9999px;
+    top: 0px;
+    bottom: 0px;
+    background: rgba(0,0,0,.5);
+}
+
+/*/Shade Inactive Elements*/
+
+section.ccms-picture figure {
+    margin: 0px;
+    overflow: hidden;
+}
+
+section.ccms-picture figure img {
+    vertical-align: middle;
+}
+
+section.ccms-picture figcaption {/*Caption*/
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background: rgba(0,0,0,.65);
+    padding: 2.5%;
+    color: #fff;
+}
+
+/*Picture Controls*/
+figure.ccms-picture-image {
+    position: relative;
+}
+
+/*Text Controls*/
+
+.text-under .col {
+    margin: auto;
+    padding: 15px 15px 0px 15px;
+}
+
+.text-under .textUnder .ccms-picture-description {
+  padding-bottom: 15px;
+}
+
+.overlay .col {
+    margin: auto;
+}
+
+.picture-cover {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 15px;
+    right: 15px;
+    padding:2.5%;
+    background: rgba(0,0,0,.6);
+    color: #fff;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.picture-cover h3{color:#fff;}
+
+.picture-cover .btn-outline-dark {
+    color: #fff;
+    border-color: #fff;
+}
+
+/*Align left*/
+.align-left h3.ccms-picture-title, .align-left p.ccms-picture-description, .align-left div.ccms-picture-button {
+    text-align: left;
+}
+
+/*Align Right*/
+.align-right h3.ccms-picture-title, .align-right p.ccms-picture-description, .align-right div.ccms-picture-button {
+    text-align: right;
+}
+
+/*Align Center*/
+.align-center h3.ccms-picture-title, .align-center p.ccms-picture-description, .align-center div.ccms-picture-button {
+    text-align: center;
+}
+
+/*Bootstrap Grid (minified for picture element)*/
+
+/*default grid establish flexgrid and fallback for mobile*/
+section.ccms-picture .col-1,
+section.ccms-picture .col-2,
+section.ccms-picture .col-3,
+section.ccms-picture .col-4,
+section.ccms-picture .col-5,
+section.ccms-picture .col-6,
+section.ccms-picture .col-7,
+section.ccms-picture .col-8,
+section.ccms-picture .col-9,
+section.ccms-picture .col-10,
+section.ccms-picture .col-11,
+section.ccms-picture .col-12,
+section.ccms-picture .col,
+section.ccms-picture .col-auto,
+section.ccms-picture .col-sm-1,
+section.ccms-picture .col-sm-2,
+section.ccms-picture .col-sm-3,
+section.ccms-picture .col-sm-4,
+section.ccms-picture .col-sm-5,
+section.ccms-picture .col-sm-6,
+section.ccms-picture .col-sm-7,
+section.ccms-picture .col-sm-8,
+section.ccms-picture .col-sm-9,
+section.ccms-picture .col-sm-10,
+section.ccms-picture .col-sm-11,
+section.ccms-picture .col-sm-12,
+section.ccms-picture .col-sm,
+section.ccms-picture .col-sm-auto,
+section.ccms-picture .col-md-1,
+section.ccms-picture .col-md-2,
+section.ccms-picture .col-md-3,
+section.ccms-picture .col-md-4,
+section.ccms-picture .col-md-5,
+section.ccms-picture .col-md-6,
+section.ccms-picture .col-md-7,
+section.ccms-picture .col-md-8,
+section.ccms-picture .col-md-9,
+section.ccms-picture .col-md-10,
+section.ccms-picture .col-md-11,
+section.ccms-picture .col-md-12,
+section.ccms-picture .col-md,
+section.ccms-picture .col-md-auto,
+section.ccms-picture .col-lg-1,
+section.ccms-picture .col-lg-2,
+section.ccms-picture .col-lg-3,
+section.ccms-picture .col-lg-4,
+section.ccms-picture .col-lg-5,
+section.ccms-picture .col-lg-6,
+section.ccms-picture .col-lg-7,
+section.ccms-picture .col-lg-8,
+section.ccms-picture .col-lg-9,
+section.ccms-picture .col-lg-10,
+section.ccms-picture .col-lg-11,
+section.ccms-picture .col-lg-12,
+section.ccms-picture .col-lg,
+section.ccms-picture .col-lg-auto,
+section.ccms-picture .col-xl-1,
+section.ccms-picture .col-xl-2,
+section.ccms-picture .col-xl-3,
+section.ccms-picture .col-xl-4,
+section.ccms-picture .col-xl-5,
+section.ccms-picture .col-xl-6,
+section.ccms-picture .col-xl-7,
+section.ccms-picture .col-xl-8,
+section.ccms-picture .col-xl-9,
+section.ccms-picture .col-xl-10,
+section.ccms-picture .col-xl-11,
+section.ccms-picture .col-xl-12,
+section.ccms-picture .col-xl,
+section.ccms-picture .col-xl-auto {
+  position: relative;
+  width: 100%;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+section.ccms-picture .col {
+  flex-basis: 0;
+  flex-grow: 1;
+  max-width: 100%; }
+
+section.ccms-picture .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+/*Sizing applies to all sizes above mobile*/
+@media (min-width: 576px) {
+  section.ccms-picture .col-sm {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%; }
+  section.ccms-picture .col-sm-auto {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none; }
+  section.ccms-picture .col-sm-1 {
+    flex: 0 0 8.33333%;
+    max-width: 8.33333%; }
+  section.ccms-picture .col-sm-2 {
+    flex: 0 0 16.66667%;
+    max-width: 16.66667%; }
+  section.ccms-picture .col-sm-3 {
+    flex: 0 0 25%;
+    max-width: 25%; }
+  section.ccms-picture .col-sm-4 {
+    flex: 0 0 33.33333%;
+    max-width: 33.33333%; }
+  section.ccms-picture .col-sm-5 {
+    flex: 0 0 41.66667%;
+    max-width: 41.66667%; }
+  section.ccms-picture .col-sm-6 {
+    flex: 0 0 50%;
+    max-width: 50%; }
+  section.ccms-picture .col-sm-7 {
+    flex: 0 0 58.33333%;
+    max-width: 58.33333%; }
+  section.ccms-picture .col-sm-8 {
+    flex: 0 0 66.66667%;
+    max-width: 66.66667%; }
+  section.ccms-picture .col-sm-9 {
+    flex: 0 0 75%;
+    max-width: 75%; }
+  section.ccms-picture .col-sm-10 {
+    flex: 0 0 83.33333%;
+    max-width: 83.33333%; }
+  section.ccms-picture .col-sm-11 {
+    flex: 0 0 91.66667%;
+    max-width: 91.66667%; }
+  section.ccms-picture .col-sm-12 {
+    flex: 0 0 100%;
+    max-width: 100%; } }
+

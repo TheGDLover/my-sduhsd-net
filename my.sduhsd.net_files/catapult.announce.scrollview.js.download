@@ -1,0 +1,400 @@
+﻿var CatapultAnnounce = CatapultAnnounce || {};
+
+(function ($)
+{
+	$.extend(true, CatapultAnnounce,
+	{
+		ScrollViewLoader: function (element)
+		{
+			this.element = (element instanceof $) ? element : $(element);
+		}
+	});
+
+	CatapultAnnounce.ScrollViewLoader.MainUrl = $('script[src*=catapult\\.announce\\.scrollview]').attr('src').replace(/catapult.announce.scrollview\.js.*$/, '');
+
+	CatapultAnnounce.ScrollViewLoader.loadPage = function ()
+	{
+		CatapultAnnounce.PageLoader.loadPage(CatapultAnnounce.ScrollViewLoader.MainUrl + "../pages/catapult.announce.scrollview.html?date=2020-02-18-09-00", function ()
+		{
+			initializeUI();
+		});
+
+		return true;
+	};
+
+	function initializeUI()
+	{
+		initializeControls();
+
+		clearSelectedPostAndFillPosts();
+	}
+
+	function initializeControls()
+	{
+	}
+
+	function clearSelectedPostAndFillPosts()
+	{
+		CatapultAnnounce.global.WorkingPostId('');
+		fillPosts();
+		if (!CatapultAnnounce.global.BlockAlerts) { fillAlerts(); }
+	}
+
+	function catapultannounceItemLink_onclick(e)
+	{
+		e.preventDefault();
+	}
+
+	function likeButton_click(e)
+	{
+		e.preventDefault();
+
+		var likeButton = $(this);
+
+		CatapultAnnounce.Likes.likeAPost($(likeButton).data('id'), function (numberOfLikes)
+		{
+			if (numberOfLikes > 0)
+			{
+				$(likeButton).children('.numberoflikes').html('(' + numberOfLikes + ')');
+				var likeIcon = $(likeButton).children('.fa-thumbs-o-up')
+				$(likeIcon).removeClass('fa-thumbs-o-up');
+				$(likeIcon).addClass('fa-thumbs-up');
+			}
+		});
+	}
+
+	function shareButton_click(e)
+	{
+		e.preventDefault();
+
+		showShareDialog($(this).data('id'), $(this).data('shareurl'));
+	}
+
+	function fillPosts()
+	{
+		var numberOfItems = CatapultAnnounce.global.DisplayNumberOfItems;
+		if(numberOfItems == "") { numberOfItems = "!!all!!"; }
+
+		var configuration = {};
+		configuration.SearchTitleString = "!!blank!!";
+		configuration.SearchDescriptionString = "!!blank!!";
+		configuration.OrganizationId = "!!all!!";
+		configuration.SiteId = "!!all!!";
+		configuration.FeedIdList = CatapultAnnounce.global.FeedList.join(',')
+		configuration.Category = "!!all!!";
+		configuration.Priority = "!!all!!";
+		configuration.StartDateString = "!!all!!";
+		configuration.EndDateString = "!!current!!";
+		configuration.NumberOfItems = numberOfItems;
+		configuration.ShowEnded = "false";
+		configuration.ShowFuture = "false";
+		configuration.ShowDraft = "false";
+		configuration.OrderBy = "date";
+		configuration.IsBackend = "false";
+
+		var url = CatapultAnnounce.global.ProgramUrl + "Connector/Post/v2/Search";
+		CatapultAnnounce.ServiceConnector.connect('PUT', JSON.stringify(configuration), url, function (response)
+		{
+			var listContainer = $('#catapultannounce-postList').empty();
+			var fancyboxContainer = $('#catapultannounce-fancyboxContainer').empty();
+
+			if (response && response.length > 0)
+			{
+				var screenWidth = getScreenWidth();
+				for (count = 0; count < response.length; count++)
+				{
+					var item = response[count];
+
+					// list item
+					var listItem = $('<li/>', { }).appendTo(listContainer);
+
+					if(item.Priority > 0)
+					{
+						$(listItem).addClass('catapultannounce-item-priority');
+					}
+
+					var linkItem = $('<a/>', { class: 'scrolling-link' + (item.RedirectLinkUrl != '' ? '' : ' fancybox'), 'rel': 'catapultannounce-scroll', href: (item.RedirectLinkUrl != '' ? item.RedirectLinkUrl : '#inline' + item.Id), 'data-id': item.Id, 'target': (item.RedirectLinkUrl != '' ? '_blank' : '_self'), html: item.Title }).appendTo(listItem);
+					linkItem.on('click', function (e)
+					{
+						CatapultAnnounce.Clicks.clickAPost($(this).data('id'), function (response) { });
+					});
+
+					// fancybox item
+					var fancyboxItem = $('<div/>', { 'id': 'inline' + item.Id, class: 'catapultannounce-popup', 'data-id': item.Id, style: 'display:none;' }).appendTo(fancyboxContainer);
+
+					var fancyboxTitleRow = $('<div/>', { class: 'catapultannounce-title-row' }).appendTo(fancyboxItem);
+					$('<h2/>', { class: 'catapultannounce-title', html: item.Title }).appendTo(fancyboxTitleRow);
+					$('<date/>', { class: 'catapultannounce-date', html: item.HRDetailPostDate }).appendTo(fancyboxTitleRow);
+
+					var fancyboxArticle = $('<article/>', {}).appendTo(fancyboxItem);
+
+					if(screenWidth > 700)
+					{
+						if (item.YouTubeEmbed && item.YouTubeEmbed != "") { $('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { style: 'width:100%;' }).appendTo(fancyboxArticle)); }
+						else if (item.PictureInfo && item.PictureInfo.Picture800Url != "") { $('<img/>', { src: item.PictureInfo.Picture800Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(fancyboxArticle); }
+						else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture800Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture800Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(fancyboxArticle); }
+					}
+					else
+					{
+						if (item.YouTubeEmbed && item.YouTubeEmbed != "") { $('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { style: 'width:100%;' }).appendTo(fancyboxArticle)); }
+						else if (item.PictureInfo && item.PictureInfo.Picture500Url != "") { $('<img/>', { src: item.PictureInfo.Picture500Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(fancyboxArticle); }
+						else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture500Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture500Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(fancyboxArticle); }
+					}
+
+					var descriptionHtml = "<div>" + item.Description + "</div>";
+
+					if(item.Documents && item.Documents.length > 0)
+					{
+						descriptionHtml += "<div><br /></div><div><div><strong>Documents:</strong></div><ul>";
+
+						$.each(item.Documents, function(index, documentItem)
+						{
+							descriptionHtml += "<li><a href='" + documentItem.HRUrl + "' title='" + documentItem.Title + "' alt='" + documentItem.Title + "' target='_blank'>" + documentItem.Title + "</a></li>";
+						});
+
+						descriptionHtml += "</ul></div>";
+					}
+
+					descriptionHtml += "<div><br /></div>";
+
+					$('<p/>', { html: descriptionHtml }).appendTo(fancyboxArticle);
+
+					var fancyboxFooter = $('<footer/>', {}).appendTo(fancyboxItem);
+
+					var likeButton = $('<a/>', { class: 'catapultannounce-right post-like-button', href: '#', html: '<i class="fa ' + (CatapultAnnounce.Likes.haveLikedAPost(item.Id) ? 'fa-thumbs-up' : 'fa-thumbs-o-up') + '" alt="Like" title="Like"></i> Like <span class="numberoflikes">' + (item.HRNumberOfLikes > 0 ? '(' + item.HRNumberOfLikes + ')' : '') + '</span>', 'data-id': item.Id }).appendTo(fancyboxFooter);
+					$(likeButton).on('click', likeButton_click);
+
+					if(CatapultAnnounce.global.ShareUrl != "")
+					{
+						var shareButton = $('<a/>', { class: 'catapultannounce-right', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': CatapultAnnounce.global.ShareUrl }).appendTo(fancyboxFooter);
+						$(shareButton).on('click', shareButton_click);
+					}
+					else if(item.FeedShareUrl != "")
+					{
+						var shareButton = $('<a/>', { class: 'catapultannounce-right', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': item.FeedShareUrl }).appendTo(fancyboxFooter);
+						$(shareButton).on('click', shareButton_click);
+					}
+				}
+			}
+			else
+			{
+				var listItem = $('<li/>', { }).appendTo(listContainer);
+				var linkItem = $('<a/>', { class: 'catapultannounce-link', 'rel': 'announcements-feed', href: '#', 'data-id': '-1', html: "No Items" }).appendTo(listItem);
+				linkItem.on('click', catapultannounceItemLink_onclick);
+			}
+
+			// truncate the items
+			try
+			{
+				$(document).ready(function ()
+				{
+					var fancyboxConfiguration = CatapultAnnounce.global.fancyboxConfiguration;
+					fancyboxConfiguration.afterLoad = function (upcoming, current)
+					{
+						// if both upcoming and current are filled out, then most likely this is someone pressing the prev/next buttons.  Log a click.
+						if (upcoming && current)
+						{
+							CatapultAnnounce.Clicks.clickAPost($(upcoming.content).data('id'), function (response) { });
+						}
+					};
+
+					$(".fancybox").fancybox(fancyboxConfiguration);
+					//$(".fancybox").fancybox(CatapultAnnounce.global.fancyboxConfiguration);
+
+					$('.scrolling-catapultannounce').slick(
+					{
+						vertical: true,
+						autoplay: true,
+						autoplaySpeed: CatapultAnnounce.global.ScrollViewConfig.SlideDuration,
+						infinite: true,
+						draggable: true,
+						speed: CatapultAnnounce.global.ScrollViewConfig.TransitionSpeed,
+						slidesToShow: 5,
+						slidesToScroll: 1,
+						adaptiveHeight: true,
+						accessibility: false,
+						responsive: [
+						{
+							breakpoint: 1200,
+							settings: { slidesToShow: 5, slidesToScroll: 1 }
+						},
+						{
+							breakpoint: 1023,
+							settings: { slidesToShow: 6, slidesToScroll: 1 }
+						},
+						{
+							breakpoint: 989,
+							settings: { slidesToShow: 6, slidesToScroll: 1 }
+						},
+						{
+							breakpoint: 780,
+							settings: { slidesToShow: 5, slidesToScroll: 1 }
+						}]
+					});
+				});
+			}
+			catch (ex) { console.log(ex); }
+
+			CatapultAnnounce.fireEvent("finished", { view: 'ScrollView', operation: 'FillPosts', error: false });
+		}, function (jqXHR, textStatus, errorThrown)
+		{
+			//CatapultAnnounce.global.ShowMessage("<div>Failed to get the list of posts.</div><div>If the problem continues please contact a system administrator.<div>");
+			console.log("fillPosts(): " + textStatus + " : " + errorThrown);
+			CatapultAnnounce.fireEvent("finished", { view: 'ScrollView', operation: 'FillPosts', error: true });
+		});
+	}
+
+	function fillAlerts()
+	{
+		var url = CatapultAnnounce.global.ProgramUrl + "Connector/Alert/List/" + CatapultAnnounce.global.FeedList.join(',');
+
+		CatapultAnnounce.ServiceConnector.connect('GET', {}, url, function (response)
+		{
+			var alertTriggerContainer = $('#catapultannounce-alertTrigger').empty();
+			var fancyboxContainer = $('#catapultannounce-alertFacyboxContainer').empty();
+
+			if (response && response.length > 0)
+			{
+				var screenWidth = getScreenWidth();
+				for (count = 0; count < response.length; count++)
+				{
+					var item = response[count];
+
+					// output hidden alert trigger
+					var linkItem = $('<a/>', { html: (item.Title != "" ? item.Title : '<span class="ada">Alert Trigger</span>'), class: 'scrolling-link alert-fancybox', 'rel': 'catapultannounce-scroll', href: '#inline' + item.Id, 'data-alerttype': item.AlertType, 'target': '_self' }).appendTo(alertTriggerContainer);
+
+					// fancybox item
+					var fancyboxItem = $('<div/>', { 'id': 'inline' + item.Id, class: 'catapultannounce-popup', 'data-alerttype': item.AlertType, style: 'display:none;' }).appendTo(fancyboxContainer);
+
+					//var fancyboxTitleRow = $('<div/>', { class: 'catapultannounce-title-row' }).appendTo(fancyboxItem);
+					//$('<h2/>', { class: 'catapultannounce-title', html: item.Title }).appendTo(fancyboxTitleRow);
+					//$('<date/>', { class: 'catapultannounce-date', html: item.HRDetailPostDate }).appendTo(fancyboxTitleRow);
+
+					var fancyboxArticle = $('<article/>', {}).appendTo(fancyboxItem);
+
+
+					if (item.AlertType == 'info') { $('<img/>', { 'src': CatapultAnnounce.global.ProgramUrl + "catapultv2/images/info-alert.png", 'alt': 'Information Circle Icon', 'title': 'Information Circle Icon' }).appendTo(fancyboxArticle); }
+					else if (item.AlertType == 'success') { $('<img/>', { 'src': CatapultAnnounce.global.ProgramUrl + "catapultv2/images/success-alert.png", 'alt': 'Checkbox Circle Icon', 'title': 'Checkbox Circle Icon' }).appendTo(fancyboxArticle); }
+					else if (item.AlertType == 'warning') { $('<img/>', { 'src': CatapultAnnounce.global.ProgramUrl + "catapultv2/images/warning-alert.png", 'alt': 'Exclamation Triangle Icon', 'title': 'Exclamation Triangle Icon' }).appendTo(fancyboxArticle); }
+					else if (item.AlertType == 'danger') { $('<img/>', { 'src': CatapultAnnounce.global.ProgramUrl + "catapultv2/images/danger-alert.png", 'alt': 'Exclamation Circle Icon', 'title': 'Exclamation Circle Icon' }).appendTo(fancyboxArticle); }
+					else
+					{
+						if (screenWidth > 700)
+						{
+							if (item.YouTubeEmbed && item.YouTubeEmbed != "") { $('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { style: 'width:100%;' }).appendTo(fancyboxArticle)); }
+							else if (item.PictureInfo && item.PictureInfo.Picture800Url != "") { $('<img/>', { src: item.PictureInfo.Picture800Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(fancyboxArticle); }
+							/* CA-126 Don't override "bell" icon with District/School picture
+							else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture800Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture800Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(fancyboxArticle); }*/
+							else
+							{
+								$('<img/>', { 'src': CatapultAnnounce.global.ProgramUrl + "catapultv2/images/default-alert.png", 'alt': 'Alert Bell Icon', 'title': 'Alert Bell Icon' }).appendTo(fancyboxArticle);
+							}
+						}
+						else
+						{
+							if (item.YouTubeEmbed && item.YouTubeEmbed != "") { $('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { style: 'width:100%;' }).appendTo(fancyboxArticle)); }
+							else if (item.PictureInfo && item.PictureInfo.Picture500Url != "") { $('<img/>', { src: item.PictureInfo.Picture500Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(fancyboxArticle); }
+							/* CA-126 Don't override "bell" icon with District/School picture.
+							 else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture500Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture500Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(fancyboxArticle); }*/
+							else
+							{
+								$('<img/>', { 'src': CatapultAnnounce.global.ProgramUrl + "catapultv2/images/default-alert.png", 'alt': 'Alert Bell Icon', 'title': 'Alert Bell Icon' }).appendTo(fancyboxArticle);
+							}
+						}
+					}
+
+					$('<h2/>', { class: 'catapultannounce-title', html: item.Title }).appendTo(fancyboxArticle);
+
+					var descriptionHtml = "<div>" + item.Description + "</div>";
+
+					if (item.Documents && item.Documents.length > 0)
+					{
+						// CA-127 Remove word "Documents"
+						//descriptionHtml += "<div><br /></div><div><div><strong>Documents:</strong></div><ul>";
+						descriptionHtml += "<div><br /></div><div><ul>";
+
+						$.each(item.Documents, function (index, documentItem)
+						{
+							descriptionHtml += "<li><a href='" + documentItem.HRUrl + "' title='" + documentItem.Title + "' alt='" + documentItem.Title + "' target='_blank'>" + documentItem.Title + "</a></li>";
+						});
+
+						descriptionHtml += "</ul></div>";
+					}
+
+					descriptionHtml += "<div><br /></div>";
+
+					$('<p/>', { html: descriptionHtml }).appendTo(fancyboxArticle);
+
+					var fancyboxFooter = $('<footer/>', {}).appendTo(fancyboxItem);
+					var dismissButton = $('<button/>', { 'class': 'dismiss-button', 'html': 'Dismiss', 'data-id': item.Id, 'data-close': false }).appendTo(fancyboxFooter);
+
+					/* (2/14/2020) For now remove share */
+					/* if (CatapultAnnounce.global.ShareUrl != "")
+					{
+						var fancyboxFooter = $('<footer/>', {}).appendTo(fancyboxItem);
+
+						var shareButton = $('<a/>', { class: 'catapultannounce-right', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': CatapultAnnounce.global.ShareUrl }).appendTo(fancyboxFooter);
+						$(shareButton).on('click', shareButton_click);
+					}
+					else if (item.FeedShareUrl != "")
+					{
+						var fancyboxFooter = $('<footer/>', {}).appendTo(fancyboxItem);
+
+						var shareButton = $('<a/>', { class: 'catapultannounce-right', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': item.FeedShareUrl }).appendTo(fancyboxFooter);
+						$(shareButton).on('click', shareButton_click);
+					}*/
+				}
+			}
+
+			// truncate the items
+			try
+			{
+				$(document).ready(function ()
+				{
+					$('.dismiss-button').on('click', function (e)
+					{
+						e.preventDefault();
+
+						var close = $(this).data('close');
+
+						if (close)
+						{
+							try { $.fancybox.close(); }
+							catch (ex) { console.log(ex); }
+						}
+						else
+						{
+							try { $.fancybox.next(); }
+							catch (ex) { console.log(ex); }
+						}
+					});
+
+					var fancyboxConfiguration = CatapultAnnounce.global.fancyboxAlertConfiguration;
+					fancyboxConfiguration.modal = true;
+					fancyboxConfiguration.loop = false;
+					fancyboxConfiguration.afterLoad = function ()
+					{
+						var alertType = $(this.content).data('alerttype');
+						$(this.wrap).addClass('alert ' + alertType);
+					};
+
+					fancyboxConfiguration.onUpdate = function ()
+					{
+						if (this.index == (this.group.length - 1))
+						{
+							$(this.content).find('.dismiss-button').data('close', true);
+						}
+					}
+
+					$(".alert-fancybox").fancybox(fancyboxConfiguration);
+					$('.alert-fancybox').first().click();
+				});
+			}
+			catch (ex) { console.log(ex); }
+
+		}, function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("fillAlerts(): " + textStatus + " : " + errorThrown);
+		});
+	}
+}(jQuery));

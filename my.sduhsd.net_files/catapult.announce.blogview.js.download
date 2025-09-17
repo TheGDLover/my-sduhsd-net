@@ -1,0 +1,859 @@
+﻿var CatapultAnnounce = CatapultAnnounce || {};
+
+(function ($)
+{
+	$.extend(true, CatapultAnnounce,
+	{
+		BlogViewLoader: function (element)
+		{
+			this.element = (element instanceof $) ? element : $(element);
+		}
+	});
+
+	CatapultAnnounce.BlogViewLoader.MainUrl = $('script[src*=catapult\\.announce\\.blogview]').attr('src').replace(/catapult.announce.blogview\.js.*$/, '');
+
+	CatapultAnnounce.BlogViewLoader.loadPage = function ()
+	{
+		CatapultAnnounce.PageLoader.loadPage(CatapultAnnounce.BlogViewLoader.MainUrl + "../pages/catapult.announce.blogview.html?date=2020-08-20-16-00", function ()
+		{
+			initializeUI();
+		});
+
+		return true;
+	};
+	
+	function initializeUI()
+	{
+		$('#catapultannounce-blog-panel').hide();
+		$('#catapultannounce-post-panel').hide();
+
+		initializeControls();
+		initializeFeedsDropDown();
+	}
+
+	function initializeControls()
+	{
+		// post view controls
+		$('#catapultannounce-postView-backButton').on('click', postViewBackButton_click);
+
+		// blog view controls
+		$('#catapultannounce-blogview-filterFeedsDropDown').on('change', filterFeedsDropDown_onchange);
+		$('#catapultannounce-blogview-filterCategoriesDropDown').on('change', filterCategoriesDropDown_onchange);
+		$('#catapultannounce-blogview-clearDatesButton').on('click', clearDatesButton_onclick);
+		$('#catapultannounce-blogview-searchButton').on('click', searchButton_onclick);
+		$('#catapultannounce-blogview-clearSearchButton').on('click', clearSearchButton_onclick);
+
+		$('#catapultannounce-blogview-search').on('keypress', searchTextBox_onkeypress);
+
+		try
+		{
+			$('#catapultannounce-blogview-filterStartDate').each(function()
+			{
+				$(this).data('pikaday', new Pikaday(
+				{
+					field: this,
+					format: 'MMMM DD, YYYY',
+					minDate: new Date((new Date().getFullYear() - 10), 0, 1),
+					maxDate: new Date(),
+					onSelect: function()
+					{
+						try
+						{
+							var endDatePicker = $('#catapultannounce-blogview-filterEndDate').data('pikaday');
+							if(endDatePicker !== undefined)
+							{
+								endDatePicker.setMinDate(this.getDate());
+							}
+						}
+						catch(ex) { }
+
+						clearSelectedPostAndFillPosts();
+					}
+				}));
+			});
+		}
+		catch(ex) { }
+
+		try
+		{
+			$('#catapultannounce-blogview-filterEndDate').each(function()
+			{
+				$(this).data('pikaday', new Pikaday(
+				{
+					field: this,
+					format: 'MMMM DD, YYYY',
+					minDate: new Date((new Date().getFullYear() - 10), 0, 1),
+					maxDate: new Date(),
+					onSelect: function()
+					{
+						try
+						{
+							var startDatePicker = $('#catapultannounce-blogview-filterStartDate').data('pikaday');
+							if(startDatePicker !== undefined)
+							{
+								startDatePicker.setMaxDate(this.getDate());
+							}
+						}
+						catch(ex) { }
+
+						clearSelectedPostAndFillPosts();
+					}
+				}));
+			});
+		}
+		catch(ex) { }
+	}
+
+	function searchTextBox_onkeypress(e)
+	{
+		if(e.which == 13)
+		{
+			clearSelectedPostAndFillPosts();
+			$(this).blur();
+		}
+	}
+
+	function searchButton_onclick(e)
+	{
+		clearSelectedPostAndFillPosts();
+	}
+
+	function clearSearchButton_onclick(e)
+	{
+		$('#catapultannounce-blogview-search').val('');
+		clearSelectedPostAndFillPosts();
+	}
+
+	function filterFeedsDropDown_onchange(e)
+	{
+		clearSelectedPostAndFillPosts();
+	}
+
+	function filterCategoriesDropDown_onchange(e)
+	{
+		clearSelectedPostAndFillPosts();
+	}
+
+	function clearDatesButton_onclick(e)
+	{
+		try
+		{
+			var startDatePicker = $('#catapultannounce-blogview-filterStartDate').data('pikaday');
+			var endDatePicker = $('#catapultannounce-blogview-filterEndDate').data('pikaday');
+
+			startDatePicker.setDate(null);
+			startDatePicker.setMaxDate(null);
+
+			endDatePicker.setDate(null);
+			endDatePicker.setMinDate(null);
+		}
+		catch(ex){}
+
+		clearSelectedPostAndFillPosts();
+	}
+
+	function initializeFeedsDropDown()
+	{
+		var select = $("#catapultannounce-blogview-filterFeedsDropDown");
+		select.find('option').remove();
+		$('<option/>', { text: '- All -', value: '' }).appendTo(select);
+
+		if(CatapultAnnounce.global.FeedList.length > 0)
+		{
+			CatapultAnnounce.ServiceConnector.connect('GET', {}, CatapultAnnounce.global.ProgramUrl + "Connector/Feed/MultipleList/" + CatapultAnnounce.global.FeedList.join(','), function (response)
+			{
+				// add all feed items
+				if (response && response.length > 0)
+				{
+					$.each(response, function (index, item)
+					{
+						$("<option/>", { text: item.Name, value: item.Id }).appendTo(select);
+					});
+				}
+
+				initializeFeedsDropDown_callback();
+			}, function (jqXHR, textStatus, errorThrown)
+			{
+				initializeFeedsDropDown_callback();
+				//CatapultAnnounce.global.ShowMessage("<div>Failed to get the list of categories.</div><div>If the problem continues please contact a system administrator.<div>");
+				console.log("initializeFeedsDropDown(): " + textStatus + " : " + errorThrown);
+			}, false);
+		}
+	}
+
+
+	function initializeFeedsDropDown_callback()
+	{
+		initializeCategoriesDropDown();
+	}
+
+	function initializeCategoriesDropDown()
+	{
+		var select = $("#catapultannounce-blogview-filterCategoriesDropDown");
+		select.find('option').remove();
+		$('<option/>', { text: '- All -', value: '' }).appendTo(select);
+
+		if(CatapultAnnounce.global.FeedList.length > 0)
+		{
+			CatapultAnnounce.ServiceConnector.connect('GET', {}, CatapultAnnounce.global.ProgramUrl + "Connector/PostCategory/List/" + CatapultAnnounce.global.FeedList.join(','), function (response)
+			{
+				// set up a list to output
+				var finalCategoryList = new Array();
+
+				// add all feed items
+				if (response && response.length > 0)
+				{
+					$.each(response, function (index, item)
+					{
+						if(!listContainsCategory(finalCategoryList, item.Category)) { finalCategoryList.push(item.Category); }
+					});
+				}
+
+				finalCategoryList.sort();
+
+				$.each(finalCategoryList, function (index, item)
+				{
+					$("<option/>", { text: item, value: item }).appendTo(select);
+				});
+
+				initializeCategoriesDropDown_callback();
+			}, function (jqXHR, textStatus, errorThrown)
+			{
+				initializeCategoriesDropDown_callback();
+				//CatapultAnnounce.global.ShowMessage("<div>Failed to get the list of categories.</div><div>If the problem continues please contact a system administrator.<div>");
+				console.log("initializeCategoriesDropDown(): " + textStatus + " : " + errorThrown);
+			}, false);
+		}
+	}
+
+	function initializeCategoriesDropDown_callback()
+	{
+		fillPosts();
+	}
+
+	function clearSelectedPostAndFillPosts()
+	{
+		CatapultAnnounce.global.WorkingPostId('');
+		fillPosts();
+	}
+
+	function likeButton_click(e)
+	{
+		e.preventDefault();
+
+		var likeButton = $(this);
+
+		CatapultAnnounce.Likes.likeAPost($(likeButton).data('id'), function (numberOfLikes)
+		{
+			if (numberOfLikes > 0)
+			{
+				$(likeButton).children('.numberoflikes').html('(' + numberOfLikes + ')');
+				var likeIcon = $(likeButton).children('.fa-thumbs-o-up')
+				$(likeIcon).removeClass('fa-thumbs-o-up');
+				$(likeIcon).addClass('fa-thumbs-up');
+			}
+		});
+	}
+
+	function shareButton_click(e)
+	{
+		e.preventDefault();
+
+		showShareDialog($(this).data('id'), $(this).data('shareurl'));
+	}
+
+	function fillPosts()
+	{
+		// kill any current request
+		CatapultAnnounce.ServiceConnector.abort();
+
+		$('#catapultannounce-post-panel').hide();
+		$('#catapultannounce-blog-panel').hide();
+
+		if (!CatapultAnnounce.global.BlogViewConfig.InlinePostView
+			&& CatapultAnnounce.global.WorkingPostId() != ""
+			&& typeof(CatapultAnnounce.global.WorkingPostId()) != "undefined")
+		{
+			fillPost();
+			return;
+		}
+
+		var searchString = $('#catapultannounce-blogview-search').val();
+		var organizationId = "!!all!!";
+		var siteId = "!!all!!";
+		var feedId = $('#catapultannounce-blogview-filterFeedsDropDown').val();
+		var category = $('#catapultannounce-blogview-filterCategoriesDropDown').val();
+		var priority = "!!all!!";
+		var startDate = $('#catapultannounce-blogview-filterStartDate').val();
+		var endDate = $('#catapultannounce-blogview-filterEndDate').val();
+		var numberOfItems = CatapultAnnounce.global.DisplayNumberOfItems;
+
+		if(searchString == "") { searchString = "!!blank!!"; }
+		if(feedId == "") { feedId = CatapultAnnounce.global.FeedList.join(','); }
+		if(category == "") { category = "!!all!!"; }
+		if(startDate == "") { startDate = "!!all!!"; }
+		if(endDate == "") { endDate = "!!current!!"; }
+
+		var container = $('#catapultannounce-postList').empty();
+
+		// empty full standalone container
+		$('#catapultannounce-postPanel').empty();
+
+		var page = 1;
+		_getAndOutputCurrentPostPage(container, page, searchString, organizationId, siteId, feedId, category, priority, startDate, endDate, numberOfItems);
+	}
+
+	function _getAndOutputCurrentPostPage(container, page, searchString, organizationId, siteId, feedId, category, priority, startDate, endDate, numberOfItems)
+	{
+		var configuration = {};
+		configuration.Page = page;
+		configuration.SearchTitleString = searchString;
+		configuration.SearchDescriptionString = searchString;
+		configuration.OrganizationId = organizationId;
+		configuration.SiteId = siteId;
+		configuration.FeedIdList = feedId;
+		configuration.Category = category;
+		configuration.Priority = priority;
+		configuration.StartDateString = startDate;
+		configuration.EndDateString = endDate;
+		configuration.NumberOfItems = numberOfItems;
+		configuration.ShowEnded = "false";
+		configuration.ShowFuture = "false";
+		configuration.ShowDraft = "false";
+		configuration.OrderBy = "date";
+		configuration.IsBackend = "false";
+
+		var url = CatapultAnnounce.global.ProgramUrl + "Connector/Post/PagedSearch";
+		CatapultAnnounce.ServiceConnector.connect('PUT', JSON.stringify(configuration), url, function (response)
+		{
+			// remove any "holder" items
+			$(container).children('.catapultannounce-next-page-panel').remove();
+
+			if (response && response.PostList.length > 0)
+			{
+				var screenWidth = getScreenWidth();
+				for (count = 0; count < response.PostList.length; count++)
+				{
+					var item = response.PostList[count];
+
+					// ouput "preview" list item
+					var listItem = $('<li/>', { class: 'catapultannounce-item catapultannounce-preview', 'data-id': item.Id }).appendTo(container);
+					$(listItem).show();
+
+					if (item.HRMarkAsPriority)
+					{
+						$(listItem).addClass('catapultannounce-item-priority');
+					}
+
+					var linkItem = $('<a/>', { class: 'catapultannounce-link', 'rel': 'catapultannounce-feed', href: '#', 'data-id': item.Id, 'data-redirecturl': item.RedirectLinkUrl }).appendTo(listItem);
+					linkItem.on('click', catapultannounceItemLink_onclick);
+
+					if (item.YouTubeEmbed && item.YouTubeEmbed != "")
+					{
+						//var imageContainer = $('<div/>', { class: 'catapultannounce-image-holder' }).appendTo(linkItem);
+						//$('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo(imageContainer);
+
+						var imageContainer = $('<div/>', { class: 'catapultannounce-image-holder' }).appendTo(linkItem);
+						$('<div/>', { class: 'catapultannounce-image', style: "background-image: url('" + item.YouTubeEmbedPreviewPicture + "');", 'alt': (item.PictureAltTag != '' ? item.PictureAltTag : 'Youtube Video'), 'title': (item.PictureAltTag != '' ? item.PictureAltTag : 'Youtube Video') }).appendTo(imageContainer);
+					}
+					else if (item.PictureInfo && item.PictureInfo.Picture250Url != "")
+					{
+						var imageContainer = $('<div/>', { class: 'catapultannounce-image-holder' }).appendTo(linkItem);
+						$('<div/>', { class: 'catapultannounce-image', style: "background-image: url('" + item.PictureInfo.Picture250Url + "');", 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(imageContainer);
+					}
+					else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture250Url != "")
+					{
+						var imageContainer = $('<div/>', { class: 'catapultannounce-image-holder' }).appendTo(linkItem);
+						$('<div/>', { class: 'catapultannounce-image', style: "background-image: url('" + item.DefaultPictureInfo.Picture250Url + "');", 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(imageContainer);
+					}
+
+					var postText = $('<div/>', { class: 'catapultannounce-text' }).appendTo(linkItem);
+
+					var titleRow = $('<div/>', { class: 'catapultannounce-title-row' }).appendTo(postText);
+					$('<h3/>', { html: item.Title, class: 'catapultannounce-title' }).appendTo(titleRow);
+					$('<date/>', { html: item.HRListPostDate, class: 'catapultannounce-date' }).appendTo(titleRow);
+
+					$('<article/>', { class: 'catapultannounce-description', html: item.HRDescription + '<span class="readmore">' + item.DefaultReadMoreButtonLabel + '</span>' }).appendTo(postText);
+
+					// ouput "full-standalone" html
+					setStandalonePostHtml(item, $('#catapultannounce-postPanel'), screenWidth, false);
+
+					// ouput "full-inline" list item
+					var listItem = $('<li/>', { class: 'catapultannounce-item catapultannounce-full-post selected', 'data-id': item.Id }).appendTo(container);
+					$(listItem).hide();
+
+					if (item.HRMarkAsPriority)
+					{
+						$(listItem).addClass('catapultannounce-item-priority');
+					}
+
+					var textPanel = $('<div/>', { class: 'catapultannounce-text' }).appendTo(listItem);
+
+					var headerPanel = $('<header/>', {}).appendTo(textPanel);
+
+					var likeButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons post-like-button', href: '#', html: '<i class="fa ' + (CatapultAnnounce.Likes.haveLikedAPost(item.Id) ? 'fa-thumbs-up' : 'fa-thumbs-o-up') + '" alt="Like" title="Like"></i> Like <span class="numberoflikes">' + (item.HRNumberOfLikes > 0 ? '(' + item.HRNumberOfLikes + ')' : '') + '</span>', 'data-id': item.Id, style: 'color:#000; margin-left: 5px;' }).appendTo(headerPanel);
+					$(likeButton).on('click', likeButton_click);
+
+					if (CatapultAnnounce.global.ShareUrl != "")
+					{
+						var shareButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': CatapultAnnounce.global.ShareUrl, style: 'color:#000; margin-left: 5px;' }).appendTo(headerPanel);
+						$(shareButton).on('click', shareButton_click);
+					}
+					else if (item.FeedShareUrl != "")
+					{
+						var shareButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': item.FeedShareUrl, style: 'color:#000; margin-left: 5px;' }).appendTo(headerPanel);
+						$(shareButton).on('click', shareButton_click);
+					}
+
+					$('<date/>', { class: 'catapultannounce-date', html: item.HRDetailPostDate }).appendTo(headerPanel);
+
+					if (screenWidth > 700)
+					{
+						if (item.YouTubeEmbed && item.YouTubeEmbed != "")
+						{
+							$('<div/>', { html: '', class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { class: 'catapultannounce-youtubeembed-container', style: 'width:800px;' }).appendTo(textPanel));
+							$('<input/>', { type: 'hidden', value: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed-hidden' }).appendTo(textPanel);
+						}
+						else if (item.PictureInfo && item.PictureInfo.Picture800Url != "") { $('<img/>', { src: item.PictureInfo.Picture800Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(textPanel); }
+						else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture800Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture800Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(textPanel); }
+					}
+					else
+					{
+						if (item.YouTubeEmbed && item.YouTubeEmbed != "")
+						{
+							$('<div/>', { html: '', class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { class: 'catapultannounce-youtubeembed-container', style: 'width:500px;' }).appendTo(textPanel));
+							$('<input/>', { type: 'hidden', value: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed-hidden' }).appendTo(textPanel);
+						}
+						else if (item.PictureInfo && item.PictureInfo.Picture500Url != "") { $('<img/>', { src: item.PictureInfo.Picture500Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(textPanel); }
+						else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture500Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture500Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(textPanel); }
+					}
+
+					$('<h2/>', { html: item.Title }).appendTo(textPanel);
+
+					var descriptionHtml = "<div>" + item.Description + "</div>";
+
+					if (item.Documents && item.Documents.length > 0)
+					{
+						descriptionHtml += "<div><br /></div><div><div><strong>Documents:</strong></div><ul>";
+
+						$.each(item.Documents, function (index, documentItem)
+						{
+							descriptionHtml += "<li><a href='" + documentItem.HRUrl + "' title='" + documentItem.Title + "' alt='" + documentItem.Title + "' target='_blank'>" + documentItem.Title + "</a></li>";
+						});
+
+						descriptionHtml += "</ul></div>";
+					}
+
+					$('<p/>', { html: descriptionHtml }).appendTo(textPanel);
+
+					if (item.Categories.length > 0)
+					{
+						var categoriesHolder = $('<span/>', { class: 'catapultannounce-meta' }).appendTo(textPanel);
+						$('<span/>', { html: 'Posted In ' }).appendTo(categoriesHolder);
+
+						for (count2 = 0; count2 < item.Categories.length; count2++)
+						{
+							if (count2 > 0) { $('<span/>', { html: ', ' }).appendTo(categoriesHolder); }
+
+							var categoryLink = $('<a/>', { href: '#', 'data-category': item.Categories[count2].Category, html: item.Categories[count2].Category }).appendTo(categoriesHolder);
+							categoryLink.on('click', catapultannounceCategoryLink_onclick);
+						}
+					}
+
+					var footerPanel = $('<footer/>', {}).appendTo(textPanel);
+
+					var displayPrevious = (count > 0);
+					var previousLink = $('<a/>', { href: '#', class: 'catapultannounce-footer-nav' + (displayPrevious ? ' catapultannounce-prev' : ''), html: (displayPrevious ? 'Previous' : '') + '<span class="ada">Previous</span>', 'data-id': (displayPrevious ? response.PostList[(count - 1)].Id : '-1') }).appendTo(footerPanel);
+					previousLink.on('click', catapultannouncePreviousLink_onclick);
+
+					var closeLink = $('<a/>', { href: '#', class: 'catapultannounce-footer-nav catapultannounce-close', html: 'Close' + '<span class="ada">Close</span>', 'data-id': item.Id, style: 'margin-left: 15px;' }).appendTo(footerPanel);
+					closeLink.on('click', catapultannounceCloseLink_onclick);
+
+					var displayNext = (count < (response.PostList.length - 1));
+					var nextLink = $('<a/>', { href: '#', class: 'catapultannounce-footer-nav' + (displayNext ? ' catapultannounce-next' : ''), html: (displayNext ? 'Next' : '') + '<span class="ada">Next</span>', 'data-id': (displayNext ? response.PostList[(count + 1)].Id : '-1'), style: 'margin-left: 15px;' }).appendTo(footerPanel);
+					nextLink.on('click', catapultannounceNextLink_onclick);
+				}
+
+				// try and scroll to previously selected post
+				if ($('#catapultannounce-postView-previousPostId').val() != '')
+				{
+					scrollToSelectedBlogPost($('#catapultannounce-postView-previousPostId').val());
+				}
+
+				// ready the next page
+				if (response.TotalItems > response.LastIndex)
+				{
+					var listItem = $('<li/>', { class: 'catapultannounce-item catapultannounce-next-page-panel' }).appendTo(container);
+					var linkItem = $('<a/>', { class: 'catapultannounce-link', 'rel': 'announcements-feed', href: '#', 'data-id': '-1', 'data-redirecturl': '' }).appendTo(listItem);
+					linkItem.on('click', catapultannounceItemLink_onclick);
+					var postText = $('<div/>', { class: 'catapultannounce-text' }).appendTo(linkItem);
+					var titleRow = $('<div/>', { class: 'catapultannounce-title-row' }).appendTo(postText);
+
+					var startIndex = (response.LastIndex + 1);
+					var endIndex = (response.LastIndex + parseInt(numberOfItems));
+					if (endIndex > response.TotalItems) { endIndex = response.TotalItems; }
+
+					$('<h3/>', { html: 'Loading item(s) ' + (startIndex != endIndex ? startIndex + '-' + endIndex : endIndex) + '/' + response.TotalItems + '&nbsp;&nbsp;<i class="fa fa-refresh fa-spin fa-fw ml-3"></i>', class: 'catapultannounce-title' }).appendTo(titleRow);
+
+					// get the next page
+					setTimeout(function () { _getAndOutputCurrentPostPage(container, (page + 1), searchString, organizationId, siteId, feedId, category, priority, startDate, endDate, numberOfItems); }, 100);
+				}
+			}
+			else
+			{
+				var listItem = $('<li/>', { class: 'catapultannounce-item' }).appendTo(container);
+				var linkItem = $('<a/>', { class: 'catapultannounce-link', 'rel': 'announcements-feed', href: '#', 'data-id': '-1', 'data-redirecturl': '' }).appendTo(listItem);
+				linkItem.on('click', catapultannounceItemLink_onclick);
+				var postText = $('<div/>', { class: 'catapultannounce-text' }).appendTo(linkItem);
+				var titleRow = $('<div/>', { class: 'catapultannounce-title-row' }).appendTo(postText);
+				$('<h3/>', { html: 'No Items', class: 'catapultannounce-title' }).appendTo(titleRow);
+			}
+
+			// truncate the items
+			try
+			{
+				$(document).ready(function ()
+				{
+					setupDotDotDotTrunctate('.catapultannounce-description', { watch: "window", after: "span.readmore" });
+					setupDotDotDotTrunctate('.catapultannounce-title', { watch: "window" });
+				});
+			}
+			catch (ex) { }
+
+			if (page == 1)
+			{
+				$('#catapultannounce-blog-panel').show();
+			}
+
+			CatapultAnnounce.fireEvent("finished", { view: 'BlogView', operation: 'FillPosts', error: false });
+
+		}, function (jqXHR, textStatus, errorThrown)
+		{
+			$('#catapultannounce-blog-panel').show();
+			//CatapultAnnounce.global.ShowMessage("<div>Failed to get the list of posts.</div><div>If the problem continues please contact a system administrator.<div>");
+			console.log("_getAndOutputCurrentPostPage(): " + textStatus + " : " + errorThrown);
+
+			CatapultAnnounce.fireEvent("finished", { view: 'BlogView', operation: 'FillPosts', error: true });
+		}, (page == 1));
+	}
+
+	function getNextPage()
+	{
+	}
+
+	function scrollToSelected()
+	{
+		$('.selected').each(function()
+		{
+			if ($(this).is(':visible'))
+			{
+				var selectedItem = $(this);
+				window.setTimeout(function ()
+				{
+					try
+					{
+						var scrollTo = selectedItem.position().top - 50;
+						if (scrollTo < 0) { scrollTo = 0; }
+						$('html, body').animate({ scrollTop: scrollTo }, 200);
+					}
+					catch (ex) { console.log(ex); }
+				}, 100);
+			}
+		});
+	}
+
+	function showPreviewAllFull()
+	{
+		$('.catapultannounce-item.catapultannounce-full-post').each(function (index, item)
+		{
+			if($(this).is(':visible'))
+			{
+				showPreviewItem($(this).data('id'));
+			}
+		});
+	}
+
+	function showPreviewItem(itemId)
+	{
+		$('.catapultannounce-item.catapultannounce-full-post[data-id=' + itemId + ']').slideUp(100);
+		$('.catapultannounce-item.catapultannounce-preview[data-id=' + itemId + ']').slideDown(400);
+	}
+
+	function showFullItem(itemId)
+	{
+		$('.catapultannounce-item.catapultannounce-preview[data-id=' + itemId + ']').slideUp(100);
+		$('.catapultannounce-item.catapultannounce-full-post[data-id=' + itemId + ']').slideDown(400, function () { scrollToSelected(); });
+
+		// make sure youtube embed gets set
+		var youTubeEmbedCode = $('.catapultannounce-item.catapultannounce-full-post[data-id=' + itemId + ']').find('.catapultannounce-youtubeembed-hidden').val();
+		$('.catapultannounce-item.catapultannounce-full-post[data-id=' + itemId + ']').find('.catapultannounce-youtubeembed').html(youTubeEmbedCode);
+
+		CatapultAnnounce.Clicks.clickAPost($(this).data('id'), function (totalClicks) { });
+	}
+
+	function catapultannounceItemLink_onclick(e)
+	{
+		e.preventDefault();
+
+		if($(this).data('id') != "-1")
+		{
+			if ($(this).data('redirecturl') != '')
+			{
+				window.open($(this).data('redirecturl'));
+			}
+			else if (CatapultAnnounce.global.BlogViewConfig.InlinePostView)
+			{
+				// close anything open
+				showPreviewAllFull();
+
+				// show item
+				showFullItem($(this).data('id'));
+			}
+			else
+			{
+				// hide all items
+				$('#catapultannounce-postPanel .catapultannounce-full-post').hide();
+				$('#catapultannounce-postPanel .catapultannounce-full-post[data-id=' + $(this).data('id') + ']').show();
+
+				// make sure youtube embed gets set
+				var youTubeEmbedCode = $('#catapultannounce-postPanel .catapultannounce-full-post[data-id=' + $(this).data('id') + ']').find('.catapultannounce-youtubeembed-hidden').val();
+				$('#catapultannounce-postPanel .catapultannounce-full-post[data-id=' + $(this).data('id') + ']').find('.catapultannounce-youtubeembed').html(youTubeEmbedCode);
+
+				CatapultAnnounce.Clicks.clickAPost($(this).data('id'), function (totalClicks) { });
+
+				$('#catapultannounce-blog-panel').hide();
+				$('#catapultannounce-post-panel').show();
+			}
+		}
+	}
+
+	function catapultannouncePreviousLink_onclick(e)
+	{
+		e.preventDefault();
+		if($(this).data('id') != "-1")
+		{
+			//CatapultAnnounce.global.WorkingPostId($(this).data('id'));
+			//fillPosts();
+
+			// close anything open
+			showPreviewAllFull();
+
+			// show item
+			showFullItem($(this).data('id'));
+		}
+	}
+
+	function catapultannounceCloseLink_onclick(e)
+	{
+		e.preventDefault();
+		if ($(this).data('id') != "-1")
+		{
+			//CatapultAnnounce.global.WorkingPostId('');
+			//fillPosts();
+
+			// close anything open
+			showPreviewAllFull();
+		}
+	}
+
+	function catapultannounceNextLink_onclick(e)
+	{
+		e.preventDefault();
+		if($(this).data('id') != "-1")
+		{
+			//CatapultAnnounce.global.WorkingPostId($(this).data('id'));
+			//fillPosts();
+
+			// close anything open
+			showPreviewAllFull();
+
+			// show item
+			showFullItem($(this).data('id'));
+		}
+	}
+
+	function catapultannounceCategoryLink_onclick(e)
+	{
+		e.preventDefault();
+		try
+		{
+			$('#catapultannounce-blogview-filterCategoriesDropDown').val($(this).data('category'));
+			fillPosts();
+		}
+		catch(ex){}
+	}
+
+	// post view functions
+	function postViewBackButton_click(e)
+	{
+		e.preventDefault();
+
+		// see if we should call fill posts or not
+		var callFillPosts = $('#catapultannounce-postPanel .catapultannounce-full-post:visible').data('callfillposts');
+		
+		if(callFillPosts)
+		{
+			// save the previous id for later processing
+			$('#catapultannounce-postView-previousPostId').val(CatapultAnnounce.global.WorkingPostId());
+			CatapultAnnounce.global.WorkingPostId('');
+			fillPosts();
+		}
+		else
+		{
+			var previousPostId = $('#catapultannounce-postPanel .catapultannounce-full-post:visible').data('id');
+
+			// hide post panel, and show blog panel
+			$('#catapultannounce-post-panel').hide();
+			$('#catapultannounce-blog-panel').show();
+
+			// scroll to previously selected item
+			scrollToSelectedBlogPost(previousPostId);
+
+			// hide all items
+			$('#catapultannounce-postPanel .catapultannounce-full-post').hide();
+		}
+	}
+
+	function scrollToSelectedBlogPost(postId)
+	{
+		$('.catapultannounce-item.catapultannounce-preview[data-id="' + postId + '"]').each(function ()
+		{
+			if ($(this).is(':visible'))
+			{
+				var selectedItem = $(this);
+				window.setTimeout(function ()
+				{
+					try
+					{
+						var scrollTo = selectedItem.position().top - 50;
+						if (scrollTo < 0) { scrollTo = 0; }
+						$('html, body').animate({ scrollTop: scrollTo }, 200);
+					}
+					catch (ex) { console.log(ex); }
+				}, 100);
+			}
+		});
+	}
+
+	function setStandalonePostHtml(item, container, screenWidth, callFillPosts)
+	{
+		var listItem = $('<div/>', { class: 'catapultannounce-full-post', 'data-id': item.Id, 'data-callfillposts': callFillPosts }).appendTo(container);
+		if (!callFillPosts) { $(listItem).hide(); }
+
+		var textPanel = $('<div/>', { class: 'catapultannounce-text' }).appendTo(listItem);
+
+		var headerPanel = $('<header/>', {}).appendTo(textPanel);
+
+		var likeButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons post-like-button', href: '#', html: '<i class="fa ' + (CatapultAnnounce.Likes.haveLikedAPost(item.Id) ? 'fa-thumbs-up' : 'fa-thumbs-o-up') + '" alt="Like" title="Like"></i> Like <span class="numberoflikes">' + (item.HRNumberOfLikes > 0 ? '(' + item.HRNumberOfLikes + ')' : '') + '</span>', 'data-id': item.Id }).appendTo(headerPanel);
+		$(likeButton).on('click', likeButton_click);
+
+		if (CatapultAnnounce.global.ShareUrl != "")
+		{
+			var shareButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': CatapultAnnounce.global.ShareUrl }).appendTo(headerPanel);
+			$(shareButton).on('click', shareButton_click);
+		}
+		else if (item.FeedShareUrl != "")
+		{
+			var shareButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons', href: '#', html: '<i class="fa fa-share" alt="Share" title="Share"></i> ' + item.DefaultShareButtonLabel + '', 'data-id': item.Id, 'data-shareurl': item.FeedShareUrl }).appendTo(headerPanel);
+			$(shareButton).on('click', shareButton_click);
+		}
+
+		$('<date/>', { class: 'catapultannounce-date', html: item.HRDetailPostDate }).appendTo(headerPanel);
+
+		if (screenWidth > 700)
+		{
+			if (item.YouTubeEmbed && item.YouTubeEmbed != "")
+			{
+				$('<div/>', { html: (callFillPosts ? item.YouTubeEmbed : ''), class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { class: 'catapultannounce-youtubeembed-container', style: 'width:800px;' }).appendTo(textPanel));
+				$('<input/>', { type: 'hidden', value: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed-hidden' }).appendTo(textPanel);
+			}
+			else if (item.PictureInfo && item.PictureInfo.Picture800Url != "") { $('<img/>', { src: item.PictureInfo.Picture800Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(textPanel); }
+			else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture800Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture800Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(textPanel); }
+		}
+		else
+		{
+			if (item.YouTubeEmbed && item.YouTubeEmbed != "")
+			{
+				$('<div/>', { html: (callFillPosts ? item.YouTubeEmbed : ''), class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { class: 'catapultannounce-youtubeembed-container', style: 'width:500px;' }).appendTo(textPanel));
+				$('<input/>', { type: 'hidden', value: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed-hidden' }).appendTo(textPanel);
+			}
+			else if (item.PictureInfo && item.PictureInfo.Picture500Url != "") { $('<img/>', { src: item.PictureInfo.Picture500Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(textPanel); }
+			else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture500Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture500Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(textPanel); }
+		}
+
+		$('<h2/>', { html: item.Title }).appendTo(textPanel);
+
+		var descriptionHtml = "<div>" + item.Description + "</div>";
+
+		if (item.Documents && item.Documents.length > 0)
+		{
+			descriptionHtml += "<div><br /></div><div><div><strong>Documents:</strong></div><ul>";
+
+			$.each(item.Documents, function (index, documentItem)
+			{
+				descriptionHtml += "<li><a href='" + documentItem.HRUrl + "' title='" + documentItem.Title + "' alt='" + documentItem.Title + "' target='_blank'>" + documentItem.Title + "</a></li>";
+			});
+
+			descriptionHtml += "</ul></div>";
+		}
+
+		$('<p/>', { html: descriptionHtml }).appendTo(textPanel);
+
+		if (item.Categories.length > 0)
+		{
+			var categoriesHolder = $('<span/>', { class: 'catapultannounce-meta' }).appendTo(textPanel);
+			$('<span/>', { html: 'Posted In ' }).appendTo(categoriesHolder);
+
+			for (count2 = 0; count2 < item.Categories.length; count2++)
+			{
+				if (count2 > 0) { $('<span/>', { html: ', ' }).appendTo(categoriesHolder); }
+
+				var categoryLink = $('<span/>', { html: item.Categories[count2].Category }).appendTo(categoriesHolder);
+			}
+		}
+	}
+
+	function fillPost()
+	{
+		var postId = CatapultAnnounce.global.WorkingPostId();
+
+		if(postId == "" || typeof(postId) == "undefined")
+		{
+			// if fails to get post information
+			CatapultAnnounce.global.WorkingPostId('');
+			fillPosts();
+			return;
+		}
+
+		var url = CatapultAnnounce.global.ProgramUrl + "Connector/Post/" + postId;
+		CatapultAnnounce.ServiceConnector.connect('GET', {}, url, function (response)
+		{
+			var container = $('#catapultannounce-postPanel').empty();
+
+			if (response)
+			{
+				CatapultAnnounce.Clicks.clickAPost(response.Id, function (totalClicks) { });
+
+				var screenWidth = getScreenWidth();
+				setStandalonePostHtml(response, container, screenWidth, true);
+			}
+			else
+			{
+				$('#catapultannounce-postPanel').hide();
+				$('#catapultannounce-errorPanel').show();
+			}
+	
+			$('#catapultannounce-post-panel').show();
+
+			CatapultAnnounce.fireEvent("finished", { view: 'BlogView', operation: 'FillPosts', error: false });
+
+		}, function (jqXHR, textStatus, errorThrown)
+		{
+			// if fails to get post information
+			CatapultAnnounce.global.WorkingPostId('');
+			fillPosts();
+			//CatapultAnnounce.global.ShowMessage("<div>Failed to get the list of posts.</div><div>If the problem continues please contact a system administrator.<div>");
+			console.log("fillPost(): " + textStatus + " : " + errorThrown);
+		});
+	}
+} (jQuery));

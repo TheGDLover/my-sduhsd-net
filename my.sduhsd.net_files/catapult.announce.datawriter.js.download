@@ -1,0 +1,55 @@
+﻿var CatapultAnnounce = CatapultAnnounce || {};
+
+(function ($)
+{
+	$.extend(true, CatapultAnnounce, {
+		ServiceConnector: function (element)
+		{
+			this.element = (element instanceof $) ? element : $(element);
+		}
+	});
+
+	CatapultAnnounce.ServiceConnector.CurrentRequest = {};
+
+	CatapultAnnounce.ServiceConnector.connect = function (method, data, uri, onSuccess, onError, showLoadingPanel)
+	{
+		if (!onError) { onError = ajaxError; }
+		if (!method || method == "") { method = 'GET'; }
+
+		if (showLoadingPanel == null) { showLoadingPanel = true; }
+
+		var outputHeaders = {};
+		if (CatapultAnnounce.global.AuthToken) { outputHeaders.CatapultHeaderAuthToken = CatapultAnnounce.global.AuthToken; }
+		if (CatapultAnnounce.global.LoginToken()) { outputHeaders.CatapultHeaderLoginToken = CatapultAnnounce.global.LoginToken(); }
+		if (CatapultAnnounce.global.Username) { outputHeaders.CatapultHeaderUsername = CatapultAnnounce.global.Username; }
+		if (CatapultAnnounce.global.Password) { outputHeaders.CatapultHeaderPassword = CatapultAnnounce.global.Password; }
+		if (CatapultAnnounce.global.CatapultCMS.LoginToken) { outputHeaders.CatapultHeaderCatapultLoginToken = CatapultAnnounce.global.CatapultCMS.LoginToken; }
+		if (CatapultAnnounce.global.TranslationLanguage) { outputHeaders.CatapultHeaderTranslationLanguage = CatapultAnnounce.global.TranslationLanguage; }
+
+		if (showLoadingPanel) { CatapultAnnounce.global.ShowLoadingPanel(); }
+		CatapultAnnounce.ServiceConnector.CurrentRequest = $.ajax({
+			type: method,
+			url: uri + "?timestamp=" + printDate(),
+			data: JSON.stringify(data),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			headers: outputHeaders,
+			success: function (response)
+			{
+				CatapultAnnounce.global.HideLoadingPanel();
+				onSuccess(response);
+			},
+			error: function (jqXHR, textStatus, errorThrown)
+			{
+				CatapultAnnounce.global.HideLoadingPanel();
+				onError(jqXHR, textStatus, errorThrown);
+			}
+		});
+	};
+
+	CatapultAnnounce.ServiceConnector.abort = function()
+	{
+		try { CatapultAnnounce.ServiceConnector.CurrentRequest.abort(); }
+		catch (ex) { console.log(ex); }
+	}
+} (jQuery));

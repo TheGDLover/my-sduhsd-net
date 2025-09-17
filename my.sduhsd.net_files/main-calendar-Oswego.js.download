@@ -1,0 +1,58 @@
+// ==========================================================================
+// 2023-06-30
+// ==========================================================================
+
+$(document).ajaxComplete(function (event, xhr, settings) {
+  if (settings.url.includes("calendar")) {
+    const districtCalendarContainer = document.getElementById("districtCalendar");
+    if (districtCalendarContainer) {
+      const calendarEvents = districtCalendarContainer.querySelectorAll(".ccms-gcalendar-item");
+
+      for (let i = 0; i < calendarEvents.length; i++) {
+        const eventDateElement = calendarEvents[i].querySelector(".ccms-gcalendar-date");
+        const eventDate = eventDateElement.textContent.trim();
+        const eventMonth = eventDateElement.previousElementSibling.textContent.trim();
+
+        const eventDateString = `${eventMonth} ${eventDate}`;
+        const eventMoment = moment(eventDateString, "MMM DD");
+        const isToday = eventMoment.isSame(moment(), "day") && eventMoment.isSame(moment(), "month");
+
+        // If there is no matching event, hide the districtCalendar container
+        if (!isToday) {
+          districtCalendarContainer.style.display = "none";
+        }
+      }
+    }
+
+    if ($(".ccms-gcalendar-calendar-feed-list .ccms-gcalendar-details .calendar-arrow").length <= 0) {
+      try {
+        $(".ccms-gcalendar-calendar-feed-list .ccms-gcalendar-details").append(
+          '<div class="calendar-arrow"><span class="calendar-view-event">Learn More</span><i class="fa fa-arrow-right"></i></div>'
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+});
+
+//Add Calendar Icon to View Full Calendar
+$(document).ajaxComplete(function (event, xhr, settings) {
+  if (settings.url.includes("calendar") && $(".ccms-gcalendar-full .fa-calendar-star").length <= 0) {
+    try {
+      $(".ccms-gcalendar-full").append('<span class="viewall-icon"><i class="fal fa-calendar-star"></i><i class="fa fa-arrow-right"></i></span>');
+    } catch (error) {
+      console.log(error);
+    }
+  }
+});
+
+$(document).ajaxComplete(function (event, xhr, settings) {
+  try {
+    if (settings.url.includes("calendar")) {
+      $(".ccms-gcalendar-link").removeAttr("aria-describedby");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});

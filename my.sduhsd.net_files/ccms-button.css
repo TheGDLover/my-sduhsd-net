@@ -1,0 +1,115 @@
+﻿a.ccms-btn
+{
+	text-decoration: none;
+	-webkit-text-decoration-skip: objects;
+}
+
+.ccms-contentelement-Button .btn
+{
+	display: inline-block;
+	font-weight: 400;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	border: 1px solid transparent;
+	padding: .375rem .75rem;
+    margin-top: 0.5em;
+	margin-bottom: 1em;
+	font-size: 1rem;
+	line-height: 1.5;
+	border-radius: .25rem;
+	transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+/*Button Dark*/
+.ccms-contentelement-Button .btn-dark
+{
+	color: #fff;
+	background-color: #1d2124;
+	border-color: #171a1d;
+}
+
+.ccms-contentelement-Button .btn-dark:not(:disabled):not(.disabled).active, .ccms-contentelement-Button .btn-dark:not(:disabled):not(.disabled):active, .show>.btn-dark.dropdown-toggle
+{
+	color: #fff;
+	background-color: #23272b;
+	border-color: #1d2124;
+}
+
+.ccms-contentelement-Button .btn-dark.focus, .ccms-contentelement-Button .btn-dark:focus
+{
+	box-shadow: 0 0 0 0.2rem rgba(52,58,64,.5);
+}
+
+/*Button Light*/
+.ccms-contentelement-Button .btn-light
+{
+	color: #212529;
+	background-color: #f8f9fa;
+	border-color: #f8f9fa;
+}
+
+.ccms-contentelement-Button .btn-light:hover
+{
+	color: #212529;
+	background-color: #e2e6ea;
+	border-color: #dae0e5;
+}
+
+.ccms-contentelement-Button .btn-light.focus, .ccms-contentelement-Button .btn-light:focus {
+	box-shadow: 0 0 0 0.2rem rgba(248,249,250,.5);
+}
+
+/*Button Outline*/
+.ccms-contentelement-Button .btn-outline-dark
+{
+	color: #343a40;
+	background-color: transparent;
+	background-image: none;
+	border-color: #343a40;
+}
+
+.ccms-contentelement-Button .btn-outline-dark:hover
+{
+	color: #fff;
+	background-color: #343a40;
+	border-color: #343a40;
+}
+.ccms-contentelement-Button .btn-outline-dark.focus, .ccms-contentelement-Button .btn-outline-dark:focus
+{
+	box-shadow: 0 0 0 0.2rem rgba(52,58,64,.5);
+}
+
+/*Button Large*/
+.ccms-contentelement-Button .btn-group-lg>.btn,.ccms-contentelement-Button .btn-lg
+{
+	padding: .5rem 1rem;
+	font-size: 1.25rem;
+	line-height: 1.5;
+	border-radius: .3rem;
+}
+
+/*Button Small*/
+.ccms-contentelement-Button .btn-group-sm>.btn,.ccms-contentelement-Button .btn-sm
+{
+	padding: .25rem .5rem;
+	font-size: .875rem;
+	line-height: 1.5;
+	border-radius: .2rem;
+}
+
+/*Alignment*/
+.ccms-btn.left { float:left; }
+.ccms-btn.center { display: table; margin:0.5em auto 1em auto; }
+.ccms-btn.right { float:right; }
+
+/*Add clearfix for button to prevent left & right buttons from crashing into other objects*/
+.ccms-contentelement-Button::after {
+    display: block;
+    clear: both;
+    content: "";
+}

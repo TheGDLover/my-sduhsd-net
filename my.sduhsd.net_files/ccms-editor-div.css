@@ -1,0 +1,30 @@
+﻿.FW_EDITOR_STYLE { display: table; width: 100%; }
+.FW_EDITOR_STYLE .FW_EDITOR_ROW { display: table-row; }
+.FW_EDITOR_STYLE .FW_EDITOR_COLUMN { display: table-cell; vertical-align: top; }
+
+@media all and (max-width: 768px)
+{
+    .FW_EDITOR_STYLE {
+        display: block;
+    }
+
+    .FW_EDITOR_STYLE .FW_EDITOR_ROW {
+        display: block;
+    }
+
+    .FW_EDITOR_STYLE .FW_EDITOR_COLUMN {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .FW_EDITOR_STYLE table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1em;
+    }
+}
+
+/*List Style Overide*/
+.FW_EDITOR_STYLE .FW_EDITOR_ROW .FW_EDITOR_COLUMN ul, .FW_EDITOR_STYLE .FW_EDITOR_ROW .FW_EDITOR_COLUMN ol {list-style-position: outside;}
+.FW_EDITOR_STYLE .FW_EDITOR_ROW .FW_EDITOR_COLUMN ul li, .FW_EDITOR_STYLE .FW_EDITOR_ROW .FW_EDITOR_COLUMN ol li {margin-left: 30px;}

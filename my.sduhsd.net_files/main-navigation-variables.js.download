@@ -1,0 +1,99 @@
+//22-08-31
+
+// #region main-navigation.js variables
+
+// #region Setting up variables - DO NOT EDIT
+const navigationTypes = {
+  ElkGrove: "elkGrove",
+  FullDropdown: "fullDropdown",
+  MegaMenu: "megaMenu",
+  UnderHeader: "underHeader",
+  InsideHeader: "insideHeader",
+}
+
+const mobileNavigationToggleTypes = {
+  Collapse: "collapse",
+  OffCanvas: "offCanvas",
+}
+
+const mobileOffCanvasNavigationSides = {
+  Left: "offcanvas-start",
+  Right: "offcanvas-end",
+  Top: "offcanvas-top",
+  Bottom: "offcanvas-bottom",
+}
+
+const mobileNavigationTypes = {
+  Default: "default",
+  OffCanvas: "offCanvas",
+}
+
+const mobileNavigationExpandSizes = {
+  None: "",
+  Small: "sm",
+  Medium: "md",
+  Large: "lg",
+  ExtraLarge: "xl",
+  ExtraExtraLarge: "xxl",
+}
+// #endregion
+
+// #region Navigation Type Variables - These Probably won't change
+const navigationType = navigationTypes.ElkGrove;
+const insideHeaderTransparency = false;
+const elkGroveheader = false;
+const mobileNavigationToggleType = mobileNavigationToggleTypes.OffCanvas;
+const mobileOffCanvasNavigationSide = mobileOffCanvasNavigationSides.Left;
+const mobileNavigationType = mobileNavigationTypes.OffCanvas;
+const mobileNavigationExpandSize = mobileNavigationExpandSizes.Large;
+// #endregion
+
+// #region Main Navigation Variables - If something needs changed it's probably in here
+// Should the nav items beyond "numberOfTopNavItems" be placed inside a dropdown called "More"?
+const useMoreDropdown = true;
+
+// The number of top level nav items including the more dropdown
+let numberOfTopNavItems = 4;
+
+// Should the number of nav items change based on the window width? (only works after refresh)
+const autoNavWidth = false;
+
+// Should the nav items beyond "numberOfDropdownNavItems" be placed under "More Pages" in dropdowns?
+const useMoreInDropdowns = true;
+
+// The number of second level nav items in a dropdown before they are placed under "More Pages"
+const numberOfDropdownNavItems = 4;
+
+// Should home be shown in the first level navigation?
+const showHome = true;
+
+// Should the nav use nav images?
+const useNavImages = true;
+
+// Show nav images in mobile
+const showMobileNavImages = true;
+
+// Should mobile nav be in its own bar?
+const separateMobileNav = false;
+
+// Should the more dropdown display even if it only has one link in it?
+const allowSingleMoreDropdownLink = false;
+
+// Should the mobile nav hamburger become an X when clicked?
+const mobileNavTogglerToX = true;
+
+// Should the navigation be only two levels deep?
+const twoLevelNav = false;
+
+// Should the top level nav items have divider lines in between each one?
+const useTopLevelNavDividers = true;
+
+// Should words be able to break after a "/"?
+const breakSlashes = true;
+
+// Should the more dropdown be moved to the left if it goes off the screen?
+const autoMoreDropdownPlacement = true;
+
+//#endregion
+
+// #endregion

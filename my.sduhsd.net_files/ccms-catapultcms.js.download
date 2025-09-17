@@ -1,0 +1,41 @@
+﻿/* Dynamic Hide Content Element Scripts */
+try
+{
+	if (window.jQuery)
+	{
+		jQuery(document).ready(function()
+		{
+			try
+			{
+				jQuery('.ccms-contentelement[data-startdate]').each(function()
+				{
+					var currentDate = new Date();
+
+					var startDateString = "";
+					try { startDateString = jQuery(this).data('startdate'); } catch (ex) { }
+					var endDateString = "";
+					try { endDateString = jQuery(this).data('enddate'); } catch (ex) { }
+
+					if (startDateString != '')
+					{
+						var startDate = new Date(startDateString);
+						if (currentDate < startDate) { jQuery(this).css('display', 'none'); }
+						else if (endDateString != '')
+						{
+							var endDate = new Date(endDateString);
+							if (currentDate >= endDate) { jQuery(this).css('display', 'none'); }
+						}
+					}
+					else if (endDate != '')
+					{
+						var endDate = new Date(endDateString);
+						if (currentDate >= endDate) { jQuery(this).css('display', 'none'); }
+					}
+				});
+			}
+			catch (ex) { }
+		});
+	}
+}
+catch (ex) { }
+/* Dynamic Hide Content Element Scripts */

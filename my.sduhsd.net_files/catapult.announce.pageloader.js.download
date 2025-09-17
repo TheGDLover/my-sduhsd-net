@@ -1,0 +1,23 @@
+﻿var CatapultAnnounce = CatapultAnnounce || {};
+
+(function ($)
+{
+	$.extend(true, CatapultAnnounce, {
+		PageLoader: function (element)
+		{
+			this.element = (element instanceof $) ? element : $(element);
+		}
+	});
+
+	CatapultAnnounce.PageLoader.loadPage = function (path, complete)
+	{
+		try
+		{
+			CatapultAnnounce.global.ContentTarget.empty().load(path, complete);
+			$("body").animate({ scrollTop: 0 }, "slow");
+			return true;
+		}
+		catch (ex) { console.log(ex); }
+		return false;
+	};
+} (jQuery));

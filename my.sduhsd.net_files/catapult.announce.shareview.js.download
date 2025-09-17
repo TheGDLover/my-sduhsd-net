@@ -1,0 +1,172 @@
+﻿var CatapultAnnounce = CatapultAnnounce || {};
+
+(function ($)
+{
+	$.extend(true, CatapultAnnounce,
+	{
+		ShareViewLoader: function (element)
+		{
+			this.element = (element instanceof $) ? element : $(element);
+		}
+	});
+
+	CatapultAnnounce.ShareViewLoader.MainUrl = $('script[src*=catapult\\.announce\\.shareview]').attr('src').replace(/catapult.announce.shareview\.js.*$/, '');
+
+	CatapultAnnounce.ShareViewLoader.loadPage = function ()
+	{
+		CatapultAnnounce.PageLoader.loadPage(CatapultAnnounce.ShareViewLoader.MainUrl + "../pages/catapult.announce.shareview.html?date=2019-02-25-14-35", function ()
+		{
+			initializeUI();
+		});
+
+		return true;
+	};
+
+	function initializeUI()
+	{
+		initializeControls();
+
+		$('#catapultannounce-postPanel').show();
+		$('#catapultannounce-errorPanel').hide();
+
+		outputPost();
+	}
+
+	function initializeControls()
+	{
+	}
+
+	function outputPost()
+	{
+		var postId = CatapultAnnounce.global.WorkingPostId();
+
+		if(postId == "" || typeof(postId) == "undefined")
+		{
+			$('#catapultannounce-postPanel').hide();
+			$('#catapultannounce-errorPanel').show();
+
+			return;
+		}
+
+		var configuration = {};
+		configuration.LogView = "true";
+
+		var url = CatapultAnnounce.global.ProgramUrl + "Connector/Post/v2/" + postId;
+		CatapultAnnounce.ServiceConnector.connect('PUT', JSON.stringify(configuration), url, function (response)
+		{
+			var container = $('#catapultannounce-postPanel').empty();
+
+			if (response)
+			{
+				var screenWidth = getScreenWidth();
+				var item = response;
+
+				var listItem = $('<div/>', { class: 'catapultannounce-full-post' }).appendTo(container);
+
+				var textPanel = $('<div/>', { class: 'catapultannounce-text' }).appendTo(listItem);
+
+				var headerPanel = $('<header/>', { }).appendTo(textPanel);
+
+				if(CatapultAnnounce.global.BlogViewUrl != "")
+				{
+					var backToBlogButton = $('<a/>', { class: 'catapultannounce-fastyledbuttons', href: '#', html: '<i class="fa fa-arrow-left" alt="Blog" title="Blog"></i> Blog', style: 'color:#000; margin-left: 5px;' }).appendTo(headerPanel);
+					$(backToBlogButton).on('click', backToBlogButton_click);
+				}
+
+				$('<date/>', { class: 'catapultannounce-date', html: item.HRDetailPostDate }).appendTo(headerPanel);
+
+				if(screenWidth > 700)
+				{
+					if (item.YouTubeEmbed && item.YouTubeEmbed != "") { $('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { style: 'width:800px;' }).appendTo(textPanel)); }
+					else if (item.PictureInfo && item.PictureInfo.Picture800Url != "") { $('<img/>', { src: item.PictureInfo.Picture800Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(textPanel); }
+					else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture800Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture800Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(textPanel); }
+				}
+				else
+				{
+					if (item.YouTubeEmbed && item.YouTubeEmbed != "") { $('<div/>', { html: item.YouTubeEmbed, class: 'catapultannounce-youtubeembed' }).appendTo($('<div/>', { style: 'width:500px;' }).appendTo(textPanel)); }
+					else if (item.PictureInfo && item.PictureInfo.Picture500Url != "") { $('<img/>', { src: item.PictureInfo.Picture500Url, 'alt': item.PictureAltTag, 'title': item.PictureAltTag }).appendTo(textPanel); }
+					else if (item.DefaultPictureInfo && item.DefaultPictureInfo.Picture500Url != "") { $('<img/>', { src: item.DefaultPictureInfo.Picture500Url, 'alt': item.DefaultPictureAltTag, 'title': item.DefaultPictureAltTag }).appendTo(textPanel); }
+				}
+
+				$('<h2/>', { html: item.Title }).appendTo(textPanel);
+
+				var descriptionHtml = "<div>" + item.Description + "</div>";
+
+				if(item.Documents && item.Documents.length > 0)
+				{
+					descriptionHtml += "<div><br /></div><div><div><strong>Documents:</strong></div><ul>";
+
+					$.each(item.Documents, function(index, documentItem)
+					{
+						descriptionHtml += "<li><a href='" + documentItem.HRUrl + "' title='" + documentItem.Title + "' alt='" + documentItem.Title + "' target='_blank'>" + documentItem.Title + "</a></li>";
+					});
+
+					descriptionHtml += "</ul></div>";
+				}
+
+				$('<p/>', { html: descriptionHtml }).appendTo(textPanel);
+
+				if(item.Categories.length > 0)
+				{
+					var categoriesHolder = $('<span/>', { class: 'catapultannounce-meta' }).appendTo(textPanel);
+					$('<span/>', { html: 'Posted In ' }).appendTo(categoriesHolder);
+
+					for(count2 = 0; count2 < item.Categories.length; count2++)
+					{
+						if(count2 > 0) { $('<span/>', { html: ', ' }).appendTo(categoriesHolder); }
+
+						var categoryLink = $('<span/>', { html: item.Categories[count2].Category }).appendTo(categoriesHolder);
+					}
+				}
+
+				/*var footerPanel = $('<footer/>', { }).appendTo(textPanel);
+
+				var displayPrevious = (count > 0);
+				var previousLink = $('<a/>', { href: '#', class: 'catapultannounce-footer-nav' + (displayPrevious ? ' catapultannounce-prev' : ''), html: (displayPrevious ? 'Previous' : ''), 'data-id': (displayPrevious ? response[(count - 1)].Id : '-1') }).appendTo(footerPanel);
+				previousLink.on('click', catapultannouncePreviousLink_onclick);
+
+				var closeLink = $('<a/>', { href: '#', class: 'catapultannounce-footer-nav catapultannounce-close', html: 'Close' }).appendTo(footerPanel);
+				closeLink.on('click', catapultannounceCloseLink_onclick);
+
+				var displayNext = (count < (response.length - 1));
+				var nextLink = $('<a/>', { href: '#', class: 'catapultannounce-footer-nav' + (displayNext ? ' catapultannounce-next' : ''), html: (displayNext ? 'Next' : ''), 'data-id': (displayNext ? response[(count + 1)].Id : '-1') }).appendTo(footerPanel);
+				nextLink.on('click', catapultannounceNextLink_onclick);*/
+			}
+			else
+			{
+				$('#catapultannounce-postPanel').hide();
+				$('#catapultannounce-errorPanel').show();
+			}
+
+			// truncate the items
+			try
+			{
+				$(document).ready(function ()
+				{
+					setupDotDotDotTrunctate('.catapultannounce-description', { watch: "window", after: "span.readmore" });
+					setupDotDotDotTrunctate('.catapultannounce-title', { watch: "window" });
+				});
+			}
+			catch(ex) { }
+
+			CatapultAnnounce.fireEvent("finished", { view: 'ShareView', operation: 'OutputPost', error: false });
+
+		}, function (jqXHR, textStatus, errorThrown)
+		{
+			$('#catapultannounce-postPanel').hide();
+			$('#catapultannounce-errorPanel').show();
+			//CatapultAnnounce.global.ShowMessage("<div>Failed to get the list of posts.</div><div>If the problem continues please contact a system administrator.<div>");
+			console.log("outputPost(): " + textStatus + " : " + errorThrown);
+
+			CatapultAnnounce.fireEvent("finished", { view: 'ShareView', operation: 'OutputPost', error: true });
+		});
+	}
+
+	function backToBlogButton_click(e)
+	{
+		e.preventDefault();
+
+		CatapultAnnounce.global.WorkingPostId('');
+		document.location.href = CatapultAnnounce.global.BlogViewUrl;
+	}
+} (jQuery));

@@ -1,0 +1,1178 @@
+﻿/* TODO
+CategoryList
+*/
+window.fbAsyncInit = function ()
+{
+	FB.init(
+	{
+		appId: '520255848311111',
+		xfbml: true,
+		version: 'v2.8'
+	});
+};
+
+var CatapultAnnounce = CatapultAnnounce || {};
+
+String.prototype.startsWith = function (string) { return (this.match ? (this.match("^" + string) == string) : false); }
+String.prototype.contains = function (string) { return (this.indexOf ? (this.indexOf(string) >= 0) : false); }
+$.fn.exists = function () { return (this.length !== 0); }
+
+$.ajaxSetup({ cache: false, crossDomain: true });
+
+$.extend(true, CatapultAnnounce,
+{
+	global:
+	{
+		Version: '',
+		View: '',
+		FeedList: [],
+		CategoryList: [],
+		BlogViewUrl: '',
+		BlogViewUrlText: '',
+		BlogViewUrlPosition: '',
+		BlogViewConfig: { InlinePostView: true },
+		FeedViewConfig: { ShowImages: true },
+		ScrollViewConfig: { SlideDuration: 3000, TransitionSpeed: 500 },
+		ShareUrl: "",
+		Title: "",
+		DisplayNumberOfItems: '10',
+		ContentTarget: '',
+		ProgramUrl: '',
+		DefaultSelectedSite: 'District',
+		DefaultSelectedFeed: 'Main',
+		Username: '',
+		Password: '',
+		UserServerId: '',
+		UserLevel: '',
+		AllowDelete: false,
+		/* Back-End Locks - Based on Logged In User */
+		LoginLockOrganizationId: '',
+		LoginLockSiteId: '',
+		LoginLockFeedId: '',
+		CatapultCMS: { SwitchWebsitesUrl: '', LoginToken: '', FirstName: '', LastName: '', Username: '', UserId: '', Email: '', UserLevel: '', Server: '', OrganizationId: '', SiteId: '', OrganizationIdList: '', SiteIdList: '', SwitchWebsitesList: [] },
+		CatapultLogIn: { Active: false, OrganizationIdLockList: [], SiteIdLockList: [], SwitchWebsitesList: [] },
+		AuthToken: '',
+		IncludeBackend: false,
+		GroupByDepartmentMode: 'NotSet',
+		TranslationLanguage: '',
+		PhotoEditorSDKLicense: '{"api_token":"zwDeZ5o4UTywHhsbK5z4Xw","app_identifiers":["localhost","*.catapultcms.com","*.catapultk12.com","*.11colonialhts.net","*.auburn.k12.ca.us","*.auburnhomeshows.com","*.banning.k12.ca.us","*.berryessa.k12.ca.us","*.biggs.org","*.bigvalleyschool.org","*.bonita.k12.ca.us","*.buckeyeschools.info","*.cojusd.org","*.columbiasd.com","*.csredhawks.org","*.cuhsd.net","*.drycreek.12.ca.us","*.dunsmuirhigh.k12.ca.us","*.eduhsd.net","*.egrps.org","*.esuhsd.org","*.eurekausd.org","*.franklin.k12.ca.us","*.gallatingatewayschool.com","*.glenncoe.org","*.globecharter.org","*.grandviewchargers.org","*.guhsd.net","*.gusd.org","*.gvsd.us","*.hainesport.k12.nj.us","*.hartlandschools.us","*.imperialusd.org","*.janesvilleschool.org","*.johnmuircs.com","*.johnstonschools.org","*.johnstonville.org","*.juniperridge.org","*.kecprograms.com","*.ktjusd.k12.ca.us","*.lasac.info","*.lassencoe.org","*.lewiscenter.org","*.lmusd.net","*.longvalleycs.org","*.manzanitaelementaryschool.com","*.mjusd.com","*.msschool.org","*.mtlaurelschools.org","*.nbpschools.net","*.newburyport.k12.ma.us","*.njuhsd.com","*.nyssa.k12.or.us","*.orchardsd.org","*.orlandusd.net","*.ourpca.org","*.pgroveschool.org","*.pusdk12.org","*.pvuesd.org","*.ravenswoodschools.org","*.reedscreek.org","*.rescueusd.org","*.rocklinusd.org","*.rsd13ct.org","*.sduhsd.net","*.seq.org","*.shafferschool.com","*.sierramontessori.org","*.somersetschools.org","*.spalding.k12.ga.us","*.stals-stpats.org","*.sterlingschool.org","*.suhsd.net","*.susanvillesd.org","*.sutter.k12.ca.us","*.suttercountyadulted.org","*.twinriversusd.org","*.twpunionschools.org","*.waldenacademy.org","*.wheatlandsd.com","*.wheatlanduhsd.org","*.willowsunified.org","*.wjusd.org","*.woodbineschool.com","*.woodsideschool.us","*.wpusd.org","*.wrentham.k12.ma.us","*.wusd.k12.ca.us","*.ycusd.org"],"available_actions":[],"domains":["https://api.photoeditorsdk.com"],"enterprise_license":false,"expires_at":null,"features":["camera","library","export","customassets","whitelabel","adjustment","focus","transform"],"issued_at":1570203911,"minimum_sdk_version":"1.0","owner":"CatapultK12","platform":"HTML5","products":["pesdk"],"version":"2.4","signature":"AHXi1K007QTvXXYY1aNrvBaWpidLF401C4LYdBkQeQQ9TI71OrP0vQeiS016xiRhDOCtbJ/8ePZpMONoFZxzwV4gESb1DzZtF446A3gywFXIX8R3UCHRAdirYVBsRzm12VnjcCVFpUqMWvS7eYYqsVFb2ZjI/j98Ak0iajNk6tTDJ08mZNrdp5io58zxzt3PAEFP2JTOdjtDXk7u47AfZUmoulh/6fx4Z/e0URLw6GaHpPxHh++a7bjtKxIu4AYPYnUZANjADljzCPn4lesrYmbJ8zp6XhClnh1QhIl0oZY1Uu6VHQg8pMrKzD/DPe2xtt7sDtBCs7j558xWxnkW81U9nJXQpZIOFq8nto/oc+KY1VRYtfUq5yRPxjYD46nXNy9uqXjwlrL19oHPkC7x7EKLS3NFJb4sJ9Txay3PbfrtfN/D9BRbSbGaWQvKNQMTc5MuHfbkM6TuKVatOnuKaVo+3wxuKzuZfthwS5ugrHntd11LYDR9GgY+mfAPjc0PFoyz7wsBhVr5DDVoj4s771xhlkCgcnhQlLGkqweXDjZzczmKqaIyIAxrUEhcx1lGMU/0N0CZ3cipMrTQiQccAJvN42VgQ44TlJnSypeDgLLNM8ZFu/Jb058Cklz72GqqhunI6VOgPnyN/ODLMRq6/CzyfAF3B7/nkCVXQbDbHTQ="}',
+		fancyboxConfiguration:
+		{
+			maxWidth: 550,
+			maxHeight: 1000,
+			fitToView: false,
+			width: '85%',
+			height: '95%',
+			autoSize: false,
+			closeClick: false,
+			openEffect: 'none',
+			prevEffect: 'fade',
+			nextEffect: 'fade',
+			closeEffect: 'none',
+			keys:
+			{
+				next: {
+					34: 'up',   // page down
+					39: 'left' // right arrow
+				},
+				prev: {
+					8: 'right',  // backspace
+					33: 'down',   // page up
+					37: 'right',  // left arrow
+				},
+				close: [27], // escape key
+				play: [32], // space - start/stop slideshow
+				toggle: [70]  // letter "f" - toggle fullscreen
+			},
+			afterShow: function ()
+			{
+				$('.fancybox-inner .catapultannounce-popup article').attr('tabindex', '0');
+				$('.fancybox-inner .catapultannounce-popup article').focus();
+			},
+			afterClose: function (e)
+			{
+				try
+				{
+					var id = $(e.content).data('id');
+					$('.fancybox[data-id="' + id + '"').focus();
+				}
+				catch (ex) { console.error(ex); }
+			}
+		},
+		fancyboxAlertConfiguration:
+		{
+			maxWidth: 550,
+			minWidth: 320,
+			maxHeight: 1000,
+			fitToView: true,
+			width: '85%',
+			height: 'auto',
+			autoSize: true,
+			closeClick: false,
+			openEffect: 'none',
+			prevEffect: 'fade',
+			nextEffect: 'fade',
+			closeEffect: 'none',
+			padding: '0px',
+			keys:
+			{
+				next: {
+					34: 'up',   // page down
+					39: 'left' // right arrow
+				},
+				prev: {
+					8: 'right',  // backspace
+					33: 'down',   // page up
+					37: 'right',  // left arrow
+				},
+				close: [27], // escape key
+				play: [32], // space - start/stop slideshow
+				toggle: [70]  // letter "f" - toggle fullscreen
+			},
+			afterShow: function ()
+			{
+				$('.fancybox-inner .catapultannounce-popup article').attr('tabindex', '0');
+				$('.fancybox-inner .catapultannounce-popup article').focus();
+			},
+			afterClose: function (e)
+			{
+				try
+				{
+					var id = $(e.content).data('id');
+					$('.fancybox[data-id="' + id + '"').focus();
+				}
+				catch (ex) { console.error(ex); }
+			}
+		},
+		fancyboxEditPictureConfiguration:
+		{
+			maxWidth: 900,
+			maxHeight: 700,
+			fitToView: false,
+			width: '85%',
+			height: '95%',
+			autoSize: false,
+			closeClick: false,
+			openEffect: 'none',
+			prevEffect: 'fade',
+			nextEffect: 'fade',
+			closeEffect: 'none',
+			keys:
+			{
+				next: {
+					34: 'up',   // page down
+					39: 'left' // right arrow
+				},
+				prev: {
+					8: 'right',  // backspace
+					33: 'down',   // page up
+					37: 'right',  // left arrow
+				},
+				close: [27], // escape key
+				play: [32], // space - start/stop slideshow
+				toggle: [70]  // letter "f" - toggle fullscreen
+			}
+		},
+		AlertOnlyEditingMode: false,
+		BlockAlerts: false,
+
+		WorkingOrganizationId: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_WorkingOrganizationId', value, { expires: 1 }); }
+
+			holder = $.cookie('CatapultAnnounce_WorkingOrganizationId');
+			return holder;
+		},
+
+		WorkingSiteId: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_WorkingSiteId', value, { expires: 1 }); }
+
+			holder = $.cookie('CatapultAnnounce_WorkingSiteId');
+			return holder;
+		},
+
+		WorkingFeedId: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_WorkingFeedId', value, { expires: 1 }); }
+
+			holder = $.cookie('CatapultAnnounce_WorkingFeedId');
+			return holder;
+		},
+
+		WorkingPostId: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_WorkingPostId', value, { expires: 1 }); }
+
+			holder = $.cookie('CatapultAnnounce_WorkingPostId');
+			return holder;
+		},
+
+		WorkingPostStatusList: function (value)
+		{
+			try
+			{
+				if (value && value.length > 0)
+				{
+					$.cookie('CatapultAnnounce_WorkingPostStatusList', JSON.stringify(value), { expires: 1 });
+				}
+			}
+			catch (ex) { console.error(ex); }
+
+			var holder = new Array();
+
+			try { holder = JSON.parse($.cookie('CatapultAnnounce_WorkingPostStatusList')); }
+			catch (ex) { console.error(ex); }
+
+			return holder;
+		},
+
+		WorkingOrderBy: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_WorkingOrderBy', value, { expires: 1 }); }
+
+			var holder = $.cookie('CatapultAnnounce_WorkingOrderBy');
+			return holder;
+		},
+
+		SelectedAdminTab: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_SelectedAdminTab', value, { expires: 1 }); }
+
+			holder = $.cookie('CatapultAnnounce_SelectedAdminTab');
+			return holder;
+		},
+
+		LoginToken: function (value)
+		{
+			if (value || value == "") { $.cookie('CatapultAnnounce_LoginToken', value, { expires: 1 }); }
+
+			holder = $.cookie('CatapultAnnounce_LoginToken');
+			return holder;
+		},
+
+		reorderTable: function (e)
+		{
+			e.preventDefault();
+
+			var tableId = $(this).data('tableid');
+			var orderBy = $(this).data('orderby');
+			var dataType = $(this).data('datatype');
+
+			try
+			{
+				var rows = $('#' + tableId + ' tbody  tr').get();
+
+				rows.sort(function (a, b)
+				{
+					var A = $(a).children('td').eq(orderBy).text().toUpperCase();
+					var B = $(b).children('td').eq(orderBy).text().toUpperCase();
+
+					if (dataType == "Date")
+					{
+						try { A = new Date(A); } catch (ex) { A = new Date(); }
+						try { B = new Date(B); } catch (ex) { B = new Date(); }
+
+						if (A > B) { return -1; }
+						else if (A < B) { return 1; }
+						else { return 0; }
+					}
+					else if (dataType == "Integer")
+					{
+						try { A = parseInt(A); } catch (ex) { A = -1; }
+						try { B = parseInt(B); } catch (ex) { B = -1; }
+
+						if (isNaN(A)) { A = -1; }
+						else if (isNaN(B)) { B = -1; }
+					}
+					else if (dataType == "Float")
+					{
+						try { A = parseFloat(A); } catch (ex) { A = -1; }
+						try { B = parseFloat(B); } catch (ex) { B = -1; }
+
+						if (isNaN(A)) { A = -1; }
+						else if (isNaN(B)) { B = -1; }
+					}
+					else // String
+					{
+					}
+
+					if (A < B) { return -1; }
+					else if (A > B) { return 1; }
+					else { return 0; }
+				});
+
+				$.each(rows, function (index, row)
+				{
+					$('#' + tableId).children('tbody').append(row);
+				});
+			}
+			catch (ex) { }
+		},
+
+		ShowDialog: function (dialogId, allowClose)
+		{
+			if (dialogId)
+			{
+				allowClose = (typeof allowClose !== 'undefined' ? allowClose : true);
+				dialogId = (dialogId.indexOf('#', 0) === 0 ? dialogId.substring(1, (dialogId.length - 1)) : dialogId);
+
+				try
+				{
+					$('#' + dialogId).attr('tabindex', '1');
+					$('#' + dialogId).css('outline', 'none');
+				}
+				catch (ex) { }
+
+				// add the underlay
+				var underlay = document.createElement('div');
+				try
+				{
+					underlay.className = "catapultannounce-dialogunderlay";
+					$(underlay).attr('id', 'catapultannounce-dialogunderlay-' + dialogId);
+					if (allowClose) { underlay.onclick = function (event) { CatapultAnnounce.global.HideDialog(dialogId); } }
+					$(underlay).attr('tabindex', '1');
+					$(underlay).css('outline', 'none');
+					$('#' + dialogId).before($(underlay));
+				}
+				catch (ex) { console.error(ex); }
+
+				// add the close button
+				if (allowClose)
+				{
+					try
+					{
+						var closeButton = document.createElement('div');
+						closeButton.className = 'catapultannounce-dialog-closeButton';
+						$(underlay).attr('id', 'catapultannounce-dialog-closeButton-' + dialogId);
+						closeButton.onclick = function (event) { CatapultAnnounce.global.HideDialog(dialogId); }
+						$('#' + dialogId).prepend($(closeButton));
+					}
+					catch (ex) { }
+				}
+
+				// show the dialog and the underlay
+				try { $('#' + dialogId).show(); } catch (ex) { }
+				try { $(underlay).show(); } catch (ex) { console.error(ex); }
+
+				// set the max-height
+				var viewableHeight = 500;
+				try { viewableHeight = ($(window).outerHeight() - 100); }
+				catch (ex) { }
+
+				try
+				{
+					$('#' + dialogId + ' .catapultannounce-dialog-body').css("max-height", viewableHeight);
+				}
+				catch (ex) { }
+
+				try
+				{
+					// fix the margins of the container to center it in the window
+					var widthToUse = $('#' + dialogId).outerWidth();
+					//var heightToUse = $('#' + dialogId).outerHeight();
+
+					//if (heightToUse > viewableHeight) { heightToUse = viewableHeight; }
+
+					var widthFix = "-" + (parseInt(widthToUse / 2) + (allowClose ? 0 : 18)) + "px";
+					//var heightFix = "-" + (parseInt(heightToUse / 2) + (allowClose ? 0 : 18)) + "px";
+					$('#' + dialogId).css("margin-left", widthFix);
+					//$('#' + dialogId).css("margin-top", heightFix);
+				}
+				catch (ex) { }
+
+				try
+				{
+					$(underlay).bind('keypress', function (event) { if (event.keyCode == 27) { CatapultAnnounce.global.HideDialog(dialogId); } });
+				}
+				catch (ex) { }
+
+				try
+				{
+					$('#' + dialogId).bind('keypress', function (event) { if (event.keyCode == 27) { CatapultAnnounce.global.HideDialog(dialogId); } });
+				}
+				catch (ex) { }
+
+				try { $(underlay).focus(); } catch (ex) { }
+			}
+		},
+
+		HideDialog: function (dialogId)
+		{
+			if (dialogId)
+			{
+				dialogId = (dialogId.indexOf('#', 0) === 0 ? dialogId.substring(1, (dialogId.length - 1)) : dialogId);
+
+				try { $('#' + dialogId).hide(); } catch (ex) { }
+				try { $("#catapultannounce-dialogunderlay-" + dialogId).remove(); } catch (ex) { }
+				try { $("#catapultannounce-dialog-closeButton-" + dialogId).remove(); } catch (ex) { }
+			}
+		},
+
+		ShowLoadingPanel: function ()
+		{
+			try
+			{
+				var underlay = document.createElement('div');
+				underlay.id = "catapultannounce-loadingunderlay";
+
+				var panel = document.createElement('div');
+				panel.id = "catapultannounce-loadingpanel";
+				underlay.appendChild(panel);
+
+				$('#catapultannounce-container').append(underlay);
+				//document.body.appendChild(underlay);
+			}
+			catch (ex) { console.error(ex); }
+		},
+
+		HideLoadingPanel: function ()
+		{
+			try { $("#catapultannounce-loadingpanel").remove(); } catch (ex) { }
+			try { $("#catapultannounce-loadingunderlay").remove(); } catch (ex) { }
+		},
+
+		LoadFrontEnd: function ()
+		{
+			CatapultAnnounce.FrontEndLoader.loadPage();
+		},
+
+		LoadBackEnd: function ()
+		{
+			CatapultAnnounce.BackEndLoader.loadPage();
+		},
+
+		LoadBlogView: function ()
+		{
+			CatapultAnnounce.BlogViewLoader.loadPage();
+		},
+
+		LoadFeedView: function ()
+		{
+			CatapultAnnounce.FeedViewLoader.loadPage();
+		},
+
+		LoadSlideShowView: function ()
+		{
+			CatapultAnnounce.SlideShowViewLoader.loadPage();
+		},
+
+		LoadCarouselView: function ()
+		{
+			CatapultAnnounce.CarouselViewLoader.loadPage();
+		},
+
+		LoadElkGroveHomePageView: function ()
+		{
+			CatapultAnnounce.ElkGroveHomePageViewLoader.loadPage();
+		},
+
+		LoadScrollView: function ()
+		{
+			CatapultAnnounce.ScrollViewLoader.loadPage();
+		},
+
+		LoadShareView: function ()
+		{
+			CatapultAnnounce.ShareViewLoader.loadPage();
+		},
+
+		LoadSinglePostView: function ()
+		{
+			CatapultAnnounce.SinglePostViewLoader.loadPage();
+		},
+
+		ShowMessage: function (html)
+		{
+			$('<div/>', { html: html, id: 'catapultannounce-popupMessagePanel', class: 'catapultannounce-message', 'tabindex': '1', 'style': 'outline:none;' }).appendTo('body');
+			dialogId = '#catapultannounce-popupMessagePanel';
+
+			// get the currently focused object
+			var $focusedObject = '';
+			try { if ($(':focus')) { $focusedObject = $(':focus'); } }
+			catch (ex) { }
+
+			// add the underlay
+			var underlay = document.createElement('div');
+			try
+			{
+				underlay.className = "catapultannounce-messageunderlay";
+				$(underlay).attr('tabindex', '1');
+				$(underlay).css('outline', 'none');
+				underlay.onclick = function (event)
+				{
+					CatapultAnnounce.global.HideMessage(dialogId);
+					try { if ($focusedObject) { $focusedObject.focus(); } } catch (ex) { }
+				}
+				$(dialogId).before($(underlay));
+			}
+			catch (ex) { console.error(ex); }
+
+			// add the close button
+			try
+			{
+				var closeButton = document.createElement('div');
+				closeButton.className = 'catapultannounce-message-closeButton';
+				closeButton.onclick = function (event)
+				{
+					CatapultAnnounce.global.HideMessage(dialogId);
+					try { if ($focusedObject) { $focusedObject.focus(); } } catch (ex) { }
+				}
+				$(dialogId).prepend($(closeButton));
+			}
+			catch (ex) { }
+
+			// show the message and the underlay
+			try { $('.catapultannounce-messageunderlay').show(); } catch (ex) { }
+			try { $(dialogId).show(); } catch (ex) { }
+
+			try
+			{
+				// fix the margins of the container to center it in the window
+				var widthFix = "-" + (parseInt(($(dialogId).outerWidth() / 2)) + 50) + "px";
+				var heightFix = "-" + (parseInt(($(dialogId).outerHeight() / 2)) + 50) + "px";
+
+				$(dialogId).css("margin-left", widthFix);
+				$(dialogId).css("margin-top", heightFix);
+			}
+			catch (ex) { }
+
+			try
+			{
+				$(underlay).on('keypress', function (event)
+				{
+					event.preventDefault();
+					CatapultAnnounce.global.HideMessage(dialogId);
+					try { if ($focusedObject) { $focusedObject.focus(); } } catch (ex) { }
+				});
+			}
+			catch (ex) { }
+
+			try
+			{
+				$(dialogId).on('keypress', function (event)
+				{
+					event.preventDefault();
+					CatapultAnnounce.global.HideMessage(dialogId);
+					try { if ($focusedObject) { $focusedObject.focus(); } } catch (ex) { }
+				});
+			}
+			catch (ex) { }
+
+			try { $(underlay).focus(); } catch (ex) { console.error(ex); }
+		},
+
+		HideMessage: function (dialogId)
+		{
+			try { $((dialogId.lastIndexOf('#', 0) === 0 ? dialogId : '#' + dialogId)).remove(); } catch (ex) { }
+			try { $(".catapultannounce-messageunderlay").remove(); } catch (ex) { }
+			try { $(".catapultannounce-message-closeButton").remove(); } catch (ex) { }
+		},
+
+		GeneratePassword: function (nb)
+		{
+			var chars = 'azertyupqsdfghjkmwxcvbn23456789AZERTYUPQSDFGHJKMWXCVBN';
+			var pass = '';
+			for (i = 0; i < nb; i++)
+			{
+				var wpos = Math.round(Math.random() * chars.length);
+				pass += chars.substring(wpos, wpos + 1);
+			}
+			return pass;
+		}
+	},
+
+	Likes:
+	{
+		haveLikedAPost: function (postId)
+		{
+			var liked = false;
+
+			var holder = $.cookie('CatapultAnnounce_LikedPosts');
+			if (holder)
+			{
+				holder = holder.split(/,/);
+				liked = ($.inArray(postId.toString(), holder) > -1);
+			}
+
+			return liked;
+		},
+		likeAPost: function (postId, callback)
+		{
+			try
+			{
+				// block if already liked the post
+				if (!CatapultAnnounce.Likes.haveLikedAPost(postId))
+				{
+					CatapultAnnounce.ServiceConnector.connect('PUT', null, CatapultAnnounce.global.ProgramUrl + "Connector/PostLike/" + postId, function (response)
+					{
+						try { callback(response); }
+						catch (ex) { console.error(ex); }
+
+						// update the cookie
+						try
+						{
+							// get the list of liked posts
+							var likedPosts = $.cookie('CatapultAnnounce_LikedPosts');
+							if (!likedPosts) { likedPosts = []; }
+							else { likedPosts = likedPosts.split(/,/); }
+
+							// add the new id
+							likedPosts.push(postId);
+
+							/* set to expire after 10 years, thus making it pretty much "never" expires */
+							$.cookie('CatapultAnnounce_LikedPosts', likedPosts.join(','), { expires: 10 * 365 });
+						}
+						catch (ex) { console.error(ex); }
+					}, function (jqXHR, textStatus, errorThrown)
+					{
+						console.error("likePost(): " + textStatus + " : " + errorThrown);
+
+						try { callback(-1); }
+						catch (ex) { console.error(ex); }
+					}, false);
+				}
+			}
+			catch (ex) { console.error(ex); }
+		}
+	},
+
+	Clicks:
+	{
+		clickAPost: function (postId, callback)
+		{
+			try
+			{
+				CatapultAnnounce.ServiceConnector.connect('PUT', {}, CatapultAnnounce.global.ProgramUrl + "Connector/PostClick/" + postId, function (response)
+				{
+					try { callback(response); }
+					catch (ex) { console.error(ex); }
+				}, function (jqXHR, textStatus, errorThrown)
+				{
+					console.error("clickAPost(): " + textStatus + " : " + errorThrown);
+
+					try { callback(-1); }
+					catch (ex) { console.error(ex); }
+				}, false);
+			}
+			catch (ex) { console.error(ex); }
+		}
+	},
+
+	Shares:
+	{
+		shareAPost: function (postId, callback)
+		{
+			try
+			{
+				CatapultAnnounce.ServiceConnector.connect('PUT', {}, CatapultAnnounce.global.ProgramUrl + "Connector/PostShare/" + postId, function (response)
+				{
+					try { callback(response); }
+					catch (ex) { console.error(ex); }
+				}, function (jqXHR, textStatus, errorThrown)
+				{
+					console.error("shareAPost(): " + textStatus + " : " + errorThrown);
+
+					try { callback(-1); }
+					catch (ex) { console.error(ex); }
+				}, false);
+			}
+			catch (ex) { console.error(ex); }
+		}
+	},
+
+	fireEvent: function(eventName, params)
+	{
+		try
+		{
+			var event = jQuery.Event('ca:' + eventName);
+			event.detail = params;
+			$("body").trigger(event);
+		}
+		catch (ex) { console.error(ex); }
+	},
+
+	registerEvent: function(eventName, callback)
+	{
+		try
+		{
+			$('body').on('ca:' + eventName, callback);
+		}
+		catch (ex) { console.error(ex); }
+	}
+});
+
+function CatapultAnnouncement(configuration)
+{
+	$(document).ready(function ()
+	{
+		try
+		{
+			// make sure the program url ends with a /
+			if (configuration['ProgramUrl'].indexOf('/', configuration['ProgramUrl'].length - '/'.length) < 0 && configuration['ProgramUrl'] != '') { configuration['ProgramUrl'] += '/'; }
+
+			if (!configuration['DefaultSelectedSite'] || configuration['DefaultSelectedSite'] == '') { configuration['DefaultSelectedSite'] = 'District'; }
+
+			if (!configuration['DefaultSelectedFeed'] || configuration['DefaultSelectedFeed'] == '') { configuration['DefaultSelectedFeed'] = 'Main'; }
+
+			if (!configuration['ContentHolderId'].match('^#')) { configuration['ContentHolderId'] = "#" + configuration['ContentHolderId']; }
+
+			if (!configuration['View'] || configuration['View'] == '') { configuration['View'] = 'Backend'; }
+
+			CatapultAnnounce.global.View = configuration['View'];
+			CatapultAnnounce.global.FeedList = configuration['FeedList'];
+			CatapultAnnounce.global.CategoryList = (configuration['CategoryList'] ? configuration['CategoryList'] : []);
+			CatapultAnnounce.global.BlogViewUrl = (configuration['BlogViewUrl'] ? configuration['BlogViewUrl'] : '');
+			CatapultAnnounce.global.BlogViewUrlText = (configuration['BlogViewUrlText'] ? configuration['BlogViewUrlText'] : 'See All Announcements');
+			CatapultAnnounce.global.BlogViewUrlPosition = (configuration['BlogViewUrlPosition'] ? configuration['BlogViewUrlPosition'] : 'below');
+			CatapultAnnounce.global.DisplayNumberOfItems = (configuration['DisplayNumberOfItems'] ? configuration['DisplayNumberOfItems'] : '10');
+			CatapultAnnounce.global.ShareUrl = (configuration['ShareUrl'] ? configuration['ShareUrl'] : '');
+			CatapultAnnounce.global.Title = (configuration['Title'] ? configuration['Title'] : 'News and Announcements');
+			CatapultAnnounce.global.ContentTarget = $(configuration['ContentHolderId']);
+			CatapultAnnounce.global.ProgramUrl = configuration['ProgramUrl'];
+			CatapultAnnounce.global.AuthToken = (configuration['AuthorizationToken'] ? configuration['AuthorizationToken'] : '');
+			CatapultAnnounce.global.DefaultSelectedSite = configuration['DefaultSelectedSite'];
+			CatapultAnnounce.global.DefaultSelectedFeed = configuration['DefaultSelectedFeed'];
+			CatapultAnnounce.global.GroupByDepartmentMode = (configuration['GroupByDepartmentMode'] ? configuration['GroupByDepartmentMode'] : 'NotSet');
+			CatapultAnnounce.global.AlertOnlyEditingMode = (configuration['AlertOnlyEditingMode'] ? configuration['AlertOnlyEditingMode'] : false);
+			CatapultAnnounce.global.BlockAlerts = (configuration['BlockAlerts'] ? (configuration['BlockAlerts'] === true ? true : false) : false);
+			// Blog View Configuration
+			CatapultAnnounce.global.BlogViewConfig.InlinePostView = (configuration['BlogViewConfig'] ? (configuration['BlogViewConfig']['InlinePostView'] != undefined ? (configuration['BlogViewConfig']['InlinePostView'] ? true : false) : true) : true);
+
+			// Feed View Configuration
+			CatapultAnnounce.global.FeedViewConfig.ShowImages = (configuration['FeedViewConfig'] ? (configuration['FeedViewConfig']['ShowImages'] != undefined ? (configuration['FeedViewConfig']['ShowImages'] ? true : false) : true) : true);
+
+			// Scroll View Configuration
+			CatapultAnnounce.global.ScrollViewConfig.SlideDuration = (configuration['ScrollViewConfig'] ? (configuration['ScrollViewConfig']['SlideDuration'] != undefined ? configuration['ScrollViewConfig']['SlideDuration'] : 3000) : 3000);
+			CatapultAnnounce.global.ScrollViewConfig.TransitionSpeed = (configuration['ScrollViewConfig'] ? (configuration['ScrollViewConfig']['TransitionSpeed'] != undefined ? configuration['ScrollViewConfig']['TransitionSpeed'] : 500) : 500);
+
+			// Single Post View Configuration
+			var postId = (configuration['PostId'] ? (configuration['PostId'] != undefined ? configuration['PostId'] : '') : '');
+			if (postId != '') { CatapultAnnounce.global.WorkingPostId(postId); }
+
+			// CatapultCMS Connections
+			CatapultAnnounce.global.CatapultCMS.LoginToken = (configuration['CatapultCMS'] && configuration['CatapultCMS']['LoginToken'] ? configuration['CatapultCMS']['LoginToken'] : '');
+			CatapultAnnounce.global.CatapultCMS.SwitchWebsitesUrl = (configuration['CatapultCMS'] && configuration['CatapultCMS']['SwitchWebsitesUrl'] ? configuration['CatapultCMS']['SwitchWebsitesUrl'] : '');
+			CatapultAnnounce.global.CatapultCMS.FirstName = (configuration['CatapultCMS'] && configuration['CatapultCMS']['FirstName'] ? configuration['CatapultCMS']['FirstName'] : '');
+			CatapultAnnounce.global.CatapultCMS.LastName = (configuration['CatapultCMS'] && configuration['CatapultCMS']['LastName'] ? configuration['CatapultCMS']['LastName'] : '');
+			CatapultAnnounce.global.CatapultCMS.Username = (configuration['CatapultCMS'] && configuration['CatapultCMS']['Username'] ? configuration['CatapultCMS']['Username'] : '');
+			CatapultAnnounce.global.CatapultCMS.UserId = (configuration['CatapultCMS'] && configuration['CatapultCMS']['UserId'] ? configuration['CatapultCMS']['UserId'] : '');
+			CatapultAnnounce.global.CatapultCMS.Email = (configuration['CatapultCMS'] && configuration['CatapultCMS']['Email'] ? configuration['CatapultCMS']['Email'] : '');
+			CatapultAnnounce.global.CatapultCMS.UserLevel = (configuration['CatapultCMS'] && configuration['CatapultCMS']['Level'] ? configuration['CatapultCMS']['Level'] : '');
+			CatapultAnnounce.global.CatapultCMS.OrganizationId = (configuration['CatapultCMS'] && configuration['CatapultCMS']['OrganizationId'] ? configuration['CatapultCMS']['OrganizationId'] : '');
+			CatapultAnnounce.global.CatapultCMS.SiteId = (configuration['CatapultCMS'] && configuration['CatapultCMS']['SiteId'] ? configuration['CatapultCMS']['SiteId'] : '');
+
+			CatapultAnnounce.global.CatapultCMS.OrganizationIdList = (configuration['CatapultCMS'] && configuration['CatapultCMS']['OrganizationIdList'] ? configuration['CatapultCMS']['OrganizationIdList'] : '');
+			CatapultAnnounce.global.CatapultCMS.SiteIdList = (configuration['CatapultCMS'] && configuration['CatapultCMS']['SiteIdList'] ? configuration['CatapultCMS']['SiteIdList'] : '');
+			CatapultAnnounce.global.CatapultCMS.SwitchWebsitesList = (configuration['CatapultCMS'] && configuration['CatapultCMS']['SwitchWebsitesList'] ? configuration['CatapultCMS']['SwitchWebsitesList'] : '');
+
+			CatapultAnnounce.global.CatapultCMS.Server = (configuration['CatapultCMS'] && configuration['CatapultCMS']['Server'] ? configuration['CatapultCMS']['Server'] : '');
+
+			CatapultAnnounce.ServiceConnector.connect('GET', {}, CatapultAnnounce.global.ProgramUrl + "Connector/Version", function (response)
+			{
+				CatapultAnnounce.global.Version = response;
+			}, function (jqXHR, textStatus, errorThrown)
+			{
+				console.error(textStatus);
+				console.error(errorThrown);
+				console.error(jqXHR);
+			}, false);
+
+			// check to see if there is currently a translation occuring
+			getLanguageTranslationInformation();
+
+			// check query string for a post id
+			var postId = queryStringVariable('capostid');
+			if (postId != "")
+			{
+				CatapultAnnounce.global.WorkingPostId(postId);
+			}
+
+			if (CatapultAnnounce.global.CatapultCMS && CatapultAnnounce.global.CatapultCMS.LoginToken && CatapultAnnounce.global.CatapultCMS.LoginToken != '')
+			{
+				var firstName = (CatapultAnnounce.global.CatapultCMS.FirstName == '' ? 'Catapult' : CatapultAnnounce.global.CatapultCMS.FirstName);
+				var lastName = (CatapultAnnounce.global.CatapultCMS.LastName == '' ? 'User' : CatapultAnnounce.global.CatapultCMS.LastName);
+				var username = (CatapultAnnounce.global.CatapultCMS.Username == '' ? 'catapultUser' : CatapultAnnounce.global.CatapultCMS.Username);
+				var userId = (CatapultAnnounce.global.CatapultCMS.UserId == '' ? '-1' : CatapultAnnounce.global.CatapultCMS.UserId);
+				var userEmail = (CatapultAnnounce.global.CatapultCMS.Email == '' ? "test@test.com" : CatapultAnnounce.global.CatapultCMS.Email);
+				var userLevel = (CatapultAnnounce.global.CatapultCMS.UserLevel == '' ? '3' : CatapultAnnounce.global.CatapultCMS.UserLevel);
+				var organizationId = (CatapultAnnounce.global.CatapultCMS.OrganizationId == '' ? '-1' : CatapultAnnounce.global.CatapultCMS.OrganizationId);
+				var siteId = (CatapultAnnounce.global.CatapultCMS.SiteId == '' ? '-1' : CatapultAnnounce.global.CatapultCMS.SiteId);
+
+				var organizationIdList = (CatapultAnnounce.global.CatapultCMS.OrganizationIdList == '' ? [] : JSON.parse(CatapultAnnounce.global.CatapultCMS.OrganizationIdList));
+				var siteIdList = (CatapultAnnounce.global.CatapultCMS.SiteIdList == '' ? [] : JSON.parse(CatapultAnnounce.global.CatapultCMS.SiteIdList));
+
+				var switchWebsitesList = (CatapultAnnounce.global.CatapultCMS.SwitchWebsitesList == '' ? [] : JSON.parse(CatapultAnnounce.global.CatapultCMS.SwitchWebsitesList));
+
+				var server = (CatapultAnnounce.global.CatapultCMS.Server == '' ? 'Main' : CatapultAnnounce.global.CatapultCMS.Server);
+
+				CatapultAnnounce.global.CatapultLogIn.Active = true;
+
+				var url = CatapultAnnounce.global.ProgramUrl + "Connector/CatapultAuthenticate/" + sanitizeCatapultLoginInformation(firstName) + "/" + sanitizeCatapultLoginInformation(lastName) + "/" + username + "/" + userId + "/" + userEmail + "/" + userLevel + "/" + organizationId + "/" + siteId + "/" + server;
+				CatapultAnnounce.ServiceConnector.connect('GET', {}, url, function (response)
+				{
+					CatapultAnnounce.global.WorkingOrganizationId(organizationId);
+					CatapultAnnounce.global.WorkingSiteId(siteId);
+					CatapultAnnounce.global.SelectedAdminTab('');
+					CatapultAnnounce.global.Username = "";
+					CatapultAnnounce.global.Password = "";
+					CatapultAnnounce.global.LoginToken(response);
+					CatapultAnnounce.global.LoadBackEnd();
+
+					CatapultAnnounce.global.CatapultLogIn.OrganizationIdLockList = organizationIdList;
+					CatapultAnnounce.global.CatapultLogIn.SiteIdLockList = siteIdList;
+
+					CatapultAnnounce.global.CatapultLogIn.SwitchWebsitesList = switchWebsitesList;
+				}, function (jqXHR, textStatus, errorThrown)
+				{
+					console.error(errorThrown);
+					CatapultAnnounce.global.CatapultCMS.LoginToken = '';
+					CatapultAnnounce.global.LoginToken('');
+					CatapultAnnounce.global.LoadBackEnd();
+				}, false);
+			}
+			else
+			{
+				if (CatapultAnnounce.global.View == 'Backend') { CatapultAnnounce.global.LoadBackEnd(); }
+				else if (CatapultAnnounce.global.View == 'BlogView') { CatapultAnnounce.global.LoadBlogView(); }
+				else if (CatapultAnnounce.global.View == 'FeedView') { CatapultAnnounce.global.LoadFeedView(); }
+				else if (CatapultAnnounce.global.View == 'ScrollView') { CatapultAnnounce.global.LoadScrollView(); }
+				else if (CatapultAnnounce.global.View == 'SlideShowView') { CatapultAnnounce.global.LoadSlideShowView(); }
+				else if (CatapultAnnounce.global.View == 'CarouselView') { CatapultAnnounce.global.LoadCarouselView(); }
+				else if (CatapultAnnounce.global.View == 'ElkGroveHomePageView') { CatapultAnnounce.global.LoadElkGroveHomePageView(); }
+				else if (CatapultAnnounce.global.View == 'ShareView') { CatapultAnnounce.global.LoadShareView(); }
+				else if (CatapultAnnounce.global.View == 'SinglePostView') { CatapultAnnounce.global.LoadSinglePostView(); }
+			}
+		}
+		catch (ex) { console.error(ex); }
+	});
+
+	return CatapultAnnounce;
+}
+
+function Global_ShowErrorMessage(html, title)
+{
+	try
+	{
+		var popupBack = document.createElement('div');
+		popupBack.id = "ccmsCalendarPopupBack";
+		popupBack.className = "calendar_popup_back";
+		popupBack.onclick = function (event) { Global_HideErrorMessage("ccmsCalendarPopupBack"); }
+
+		var popup = document.createElement('div');
+		popup.id = "ccmsClanedarPopup";
+		popup.className = "calendar_popup";
+		popupBack.appendChild(popup);
+
+		var popupContent = document.createElement('div');
+		popupContent.className = "calendar_popup_content";
+		popup.appendChild(popupContent);
+
+		var closeButton = document.createElement('div');
+		closeButton.className = 'calender_popup_closebutton';
+		closeButton.onclick = function (event) { Global_HideErrorMessage("ccmsCalendarPopupBack"); }
+		popupContent.appendChild(closeButton);
+
+		var popupIFrameContainer = document.createElement('div');
+		popupIFrameContainer.className = "calendar_popup_iframe_container";
+		//popupIFrameContainer.innerHTML = "<iframe frameborder='0' border='0' src='" + url + "' style='width:100%;height:100%;' />";
+		popupIFrameContainer.innerHTML = "<pre>" + html + "</pre>";
+		popupContent.appendChild(popupIFrameContainer);
+
+		document.body.appendChild(popupBack);
+
+		// fix the margins of the container to center it in the window
+		var widthFix = "-" + (parseInt(($("#ccmsClanedarPopup").outerWidth() / 2)) + 50) + "px";
+		var heightFix = "-" + (parseInt(($("#ccmsClanedarPopup").outerHeight() / 2)) + 50) + "px";
+		$("#ccmsClanedarPopup").css("margin-left", widthFix);
+		$("#ccmsClanedarPopup").css("margin-top", heightFix);
+	}
+	catch (ex) { console.error(ex); }
+}
+
+function Global_HideErrorMessage(id)
+{
+	var obj = document.getElementById("ccmsCalendarPopupBack");
+	if (obj) { document.body.removeChild(obj); }
+}
+
+function printDate()
+{
+	var temp = new Date();
+	var dateStr = padStr(temp.getFullYear()) +
+                  padStr(1 + temp.getMonth()) +
+                  padStr(temp.getDate()) +
+                  padStr(temp.getHours()) +
+                  padStr(temp.getMinutes()) +
+                  padStr(temp.getSeconds());
+	return dateStr;
+}
+
+function padStr(i)
+{
+	return (i < 10) ? "0" + i : "" + i;
+}
+
+function selectOptionExists(selectId, value)
+{
+	var exists = 0;
+	try { exists = $('#' + selectId + ' option').filter(function () { return $(this).val() == value; }).length; }
+	catch (ex) { exists = 0; }
+
+	if (exists) { return true; }
+	else { return false; }
+}
+
+function setupDotDotDotTrunctate(selector, configuration)
+{
+	try
+	{
+		window.setTimeout(function () { $(selector).dotdotdot(configuration); }, 100);
+	}
+	catch (ex) { console.error(ex); }
+}
+
+function listContainsCategory(list, category)
+{
+	if (list && category)
+	{
+		for (count = 0; count < list.length; count++)
+		{
+			if (list[count].toLowerCase() == category.toLowerCase()) { return true; }
+		}
+	}
+
+	return false;
+}
+
+function getScreenWidth()
+{
+	return $(document).width();
+}
+
+function queryStringVariable(variable)
+{
+	var value = "";
+	try
+	{
+		$(location.search.substr(1).split('&')).each(function (index, item)
+		{
+			if (item != "")
+			{
+				var parts = item.split('=');
+				if (parts.length > 1)
+				{
+					if (parts[0] == variable)
+					{
+						value = decodeURIComponent(parts[1].replace(/\+/g, " "));
+					}
+				}
+			}
+		});
+	}
+	catch (ex) { console.error(ex); }
+
+	return value;
+}
+
+function sanitizeCatapultLoginInformation(value)
+{
+	holder = value;
+
+	if (holder)
+	{
+		holder = encodeURIComponent(holder);
+	}
+
+	return holder;
+}
+
+function showShareDialog(id, shareUrl)
+{
+	var mainContainer = $('<div/>', { id: 'catapultannounce-shareUrlDialog', class: 'catapultannounce-dialog' }).appendTo('body');
+	var dialogBody = $('<div/>', { class: 'catapultannounce-dialog-body' }).appendTo(mainContainer);
+
+	$('<strong/>', { html: 'Share' }).appendTo($('<h3/>', {}).appendTo($('<div/>', { class: 'item' }).appendTo($('<div/>', { class: 'catapultannounce-dialog-entry large' }).appendTo(dialogBody))));
+
+	var shareTextBoxContainer = $('<div/>', { class: 'catapultannounce-dialog-entry large' }).appendTo(dialogBody);
+	$('<label/>', { class: 'label', 'for': 'catapultannounce-shareUrlDialog-shareUrlTextBox', html: 'Direct Link:' }).appendTo(shareTextBoxContainer);
+	var shareTextBox = $('<input/>', { 'type': 'text', id: 'catapultannounce-shareUrlDialog-shareUrlTextBox', style: 'width:400px;', value: shareUrl + '?capostid=' + id }).appendTo($('<div/>', { class: 'item' }).appendTo(shareTextBoxContainer));
+	shareTextBox.on('focus', function (e)
+	{
+	});
+
+	shareTextBox.on('click', function (e)
+	{
+		window.setTimeout(function () { $('#catapultannounce-shareUrlDialog-shareUrlTextBox').focus().select(); }, 10);
+	});
+
+	/* global keys */
+	var ctrlDown = false;
+	var ctrlKey = 17;
+	var cmdKey = 91;
+	var cKey = 67;
+
+	shareTextBox.on('keydown', function (e)
+	{
+		if (e.keyCode == ctrlKey || e.keyCode == cmdKey) { ctrlDown = true; }
+		else if (ctrlDown && e.keyCode == cKey) { /* do nothing so copy can go through */ }
+		else
+		{
+			e.preventDefault();
+			return false;
+		}
+	});
+
+	shareTextBox.on('keyup', function (e)
+	{
+		if (e.keyCode == ctrlKey || e.keyCode == cmdKey) { ctrlDown = false; }
+	});
+
+	window.setTimeout(function () { $('#catapultannounce-shareUrlDialog-shareUrlTextBox').focus().select(); }, 10);
+
+	var facebookShareContainer = $('<div/>', { class: 'catapultannounce-dialog-entry large' }).appendTo(dialogBody);
+	$('<div/>', { class: 'label', html: 'Facebook:' }).appendTo(facebookShareContainer);
+	var facebookShareButtonContainer = $('<div/>', { class: 'item catapultannounce-fastyledbuttons' }).appendTo(facebookShareContainer);
+	var facebookShareLink = $('<a/>', { href: '#', id: 'catapultannounce-shareUrlDialog-facebookButton', style: 'float:left; padding-left: 0px !important;', html: '<i class="fa fa-facebook-square" alt="Facebook Share" title="Facebook Share"><span class="ada">Facebook</span></i>' }).appendTo(facebookShareButtonContainer);
+	facebookShareLink.on('click', function (e)
+	{
+		e.preventDefault();
+
+		CatapultAnnounce.Shares.shareAPost(id, function (totalShares) { });
+
+		var facebookUrl = CatapultAnnounce.global.ProgramUrl + 'utilities/FacebookShareDialog.aspx?capostid=' + id + "";
+		$("<iframe />", { name: "facebookshareiframe", id: "facebookshareiframe", style: "display:none;", src: facebookUrl }).appendTo($("body"));
+	});
+
+	$('<div/>', { style: 'clear:both;' }).appendTo(facebookShareButtonContainer);
+	$('<div/>', { class: 'catapultannounce-small', html: '* Requires Browser Popups.' }).appendTo(facebookShareButtonContainer);
+
+	var twitterShareContainer = $('<div/>', { class: 'catapultannounce-dialog-entry large' }).appendTo(dialogBody);
+	$('<div/>', { class: 'label', html: 'Twitter:' }).appendTo(twitterShareContainer);
+	var twitterShareButtonContainer = $('<div/>', { class: 'item catapultannounce-fastyledbuttons' }).appendTo(twitterShareContainer);
+	var twitterShareLink = $('<a/>', { href: '#', id: 'catapultannounce-shareUrlDialog-twitterButton', style: 'float:left; padding-left: 0px !important;', html: '<i class="fa fa-twitter-square" alt="Twitter Share" title="Twitter Share"><span class="ada">Twitter</span></i>' }).appendTo(twitterShareButtonContainer);
+	twitterShareLink.on('click', function (e)
+	{
+		e.preventDefault();
+
+		CatapultAnnounce.ServiceConnector.connect('GET', {}, CatapultAnnounce.global.ProgramUrl + "Connector/Post/ShareInfo/" + $('#catapultannounce-shareUrlDialog-postIdHidden').val(), function (response)
+		{
+			var width = 500;
+			var height = 275;
+			var top = (window.screen.height / 2) - (height / 2);
+			var left = (window.screen.width / 2) - (width / 2);
+
+			CatapultAnnounce.Shares.shareAPost($('#catapultannounce-shareUrlDialog-postIdHidden').val(), function (totalShares) { });
+
+			var twitterUrl = 'https://twitter.com/intent/tweet?url=' + encodeURI(response.TwitterShareUrl) + '&text=' + encodeURIComponent(response.Title);
+
+			window.open(twitterUrl, 'catwittershare', "menubar=0,resizable=0,scrollbars=0,status=0,location=0,toolbar=0,width=" + width + ",height=" + height + ",top=" + top + ",left=" + left + "");
+		}, function (jqXHR, textStatus, errorThrown)
+		{
+			CatapultAnnounce.global.ShowMessage("<div>Failed to post to Twitter.</div><div>If the problem continues please contact a system administrator.<div>");
+			console.error("twitterShareLink.click(): " + textStatus + " : " + errorThrown);
+		});
+	});
+
+	$('<div/>', { style: 'clear:both;' }).appendTo(twitterShareButtonContainer);
+	$('<div/>', { class: 'catapultannounce-small', html: '* Requires Browser Popups.' }).appendTo(twitterShareButtonContainer);
+
+	var footerContainer = $('<div/>', { class: 'catapultannounce-center' }).appendTo($('<div/>', { class: 'catapultannounce-dialog-entry large' }).appendTo(dialogBody));
+	var postIdHidden = $('<input/>', { type: 'hidden', id: 'catapultannounce-shareUrlDialog-postIdHidden', value: id }).appendTo(footerContainer);
+	var closeButton = $('<input/>', { type: 'button', id: 'catapultannounce-shareUrlDialog-closeButton', value: 'Close' }).appendTo(footerContainer);
+	closeButton.on('click', function (e)
+	{
+		e.preventDefault();
+		CatapultAnnounce.global.HideDialog('catapultannounce-shareUrlDialog');
+		$('#catapultannounce-shareUrlDialog').remove();
+	});
+
+	CatapultAnnounce.global.ShowDialog('catapultannounce-shareUrlDialog', false);
+}
+
+function getNewGoogleTranslateLanguage()
+{
+	var language = "";
+
+	try
+	{
+		jQuery('iframe').each(function (index, item)
+		{
+			var iframeSrc = jQuery(item).attr('src');
+			if (iframeSrc.indexOf('?') > -1)
+			{
+				var queryString = iframeSrc.substring(iframeSrc.indexOf('?') + 1);
+				var queryVariables = queryString.split('&');
+				var queryParameter;
+				var i;
+
+				for (i = 0; i < queryVariables.length; i++)
+				{
+					try
+					{
+						queryParameter = queryVariables[i].split('=');
+
+						if (decodeURIComponent(queryParameter[0]) === "tl")
+						{
+							language = (queryParameter[1] === undefined ? true : decodeURIComponent(queryParameter[1]));
+							break;
+						}
+					}
+					catch (ex) { console.error(ex); }
+				}
+			}
+		});
+	}
+	catch (ex) { console.error(ex); }
+
+	return language;
+}
+
+function getLanguageTranslationInformation()
+{
+	var language = "";
+
+	try
+	{
+		if (window.location.href.indexOf('translate.goog') > -1)
+		{
+			language = getNewGoogleTranslateLanguage();
+		}
+		else
+		{
+			var sPageURL = window.location.search.substring(1);
+			var sURLVariables = sPageURL.split('&');
+			var sParameterName;
+			var i;
+
+			for (i = 0; i < sURLVariables.length; i++)
+			{
+				sParameterName = sURLVariables[i].split('=');
+
+				if (decodeURIComponent(sParameterName[0]) === "tl")
+				{
+					language = (sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]));
+				}
+			}
+		}
+	}
+	catch (ex) { console.error(ex); }
+
+	CatapultAnnounce.global.TranslationLanguage = language;
+}
+
+// for backwards compatability with I.E. 9.x
+(function () {
+	if ( typeof window.CustomEvent === "function" ) { return false; }
+
+	function CustomEvent ( event, params )
+	{
+		params = params || { bubbles: false, cancelable: false, detail: undefined };
+		var evt = document.createEvent( 'CustomEvent' );
+		evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+		return evt;
+	}
+
+	CustomEvent.prototype = window.Event.prototype;
+	window.CustomEvent = CustomEvent;
+})();

@@ -1,0 +1,48 @@
+﻿// e m a i l scripts begin ----------------------------------------------------------------
+function ccms_l(m, n, o) {
+  var u = m;
+  var v = (m * m) % n;
+  if (o % 2 == 0) u = 1;
+  var o = o / 2;
+  for (var i = 1; i <= o; i++) {
+    u = (v * u) % n;
+  }
+  return u;
+}
+
+function ccms_O2(x, z, y) {
+  x += " ";
+  var a = x.length;
+  var c = 0;
+  var b = "";
+  var f = new Array();
+  f = x.split("&");
+  var q = f.length;
+  for (var t = 0; t < q; t++) {
+    b += String.fromCharCode(ccms_l(f[t], z, y));
+  }
+  return b;
+}
+
+/* Fix for the email emailer */
+/* function O() still exists for items that are already published and may not be updated */
+function O(x, z, y) { ccms_O(x, z, y); }
+
+function ccms_O(x, z, y) {
+  var a = ccms_O2(x, z, y);
+  if (a.indexOf("mailto") == 0) {
+    parent.location = a;
+  } else {
+    try {
+      parent.location = document.getElementsByTagName("base")[0].href + a;
+    } catch (ex) {
+      parent.location = a;
+    }
+  }
+}
+
+function status_msg(message) {
+  window.status = message;
+  return true;
+}
+// e m a i l scripts end ----------------------------------------------------------------

@@ -1,0 +1,27 @@
+// 22-07-19
+
+function setCopyrightText() {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  let newCopyrightText = 'Copyright \u00A9 ';
+  const copyrightStatement = $('.copyright-statement').text().replace(/\s\s+/g, ' ');
+  const copyrightDate = copyrightStatement.indexOf('Copyright');
+  const copyrightText = copyrightStatement.substring(copyrightDate, copyrightDate + 16);
+  let copyrightYear = copyrightText.substring(copyrightText.length, copyrightText.length - 4);
+
+  copyrightYear = parseInt(copyrightYear);
+
+  if (copyrightYear < currentYear) {
+    newCopyrightText += copyrightYear + ' - ' + currentYear;
+  }
+
+  else {
+    newCopyrightText += copyrightYear;
+  }
+
+  const newCopyrightStatement = copyrightStatement.replace(copyrightText, newCopyrightText);
+
+  $('.copyright-statement').text(newCopyrightStatement);
+}
+
+$(document).ready(setCopyrightText);

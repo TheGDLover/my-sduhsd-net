@@ -1,0 +1,595 @@
+// 22-07-01
+
+// Check if the window is smaller than 992px (mobile)
+function isMobile() {
+  return $(window).width() < 992;
+}
+
+// Checks if an element exists
+// Returns true if the element exists
+
+// Example Usage
+// if($('.header').exists())
+// {
+//   $('.header').addClass('I-found-it');
+// }
+
+jQuery.fn.extend({
+  exists: function () {
+    return (!!$(this).length);
+  }
+});
+
+// Checks if elementToCheck is empty and adds the class empty-element if it is
+// Optional second parameter minWidthRemoveClass is the minimum window width that you want the empty-element class to be removed
+// Returns true for single elements if the elementToCheck is empty
+function elementEmptyCheck(elementToCheck, minWidthRemoveClass) {
+  if ($(elementToCheck).length > 1) {
+    $(elementToCheck).each(function () {
+      if ($(window).width() < minWidthRemoveClass || minWidthRemoveClass === undefined) {
+        if ($(this).text().trim() === '') {
+          $(this).addClass('empty-element');
+        }
+
+        else {
+          $(this).removeClass('empty-element');
+        }
+      }
+
+      else {
+        $(this).removeClass('empty-element');
+      }
+    });
+  }
+
+  else {
+    if ($(window).width() < minWidthRemoveClass || minWidthRemoveClass === undefined) {
+      if ($(elementToCheck).text().trim() === '') {
+        $(elementToCheck).addClass('empty-element');
+        return true;
+      }
+
+      else {
+        $(elementToCheck).removeClass('empty-element');
+        return false;
+      }
+    }
+
+    else {
+      $(elementToCheck).removeClass('empty-element');
+      return false;
+    }
+  }
+}
+
+// Checks if an element goes off the screen
+
+// Example Usage
+// if (element.is(':off-right'))
+// {
+//   element.addClass('went-off-right');
+// }
+
+(function ($) {
+  $.extend($.expr[':'], {
+    'off-top': function (element) {
+      const elementIsHidden = $(element).css('display') === 'none';
+      elementIsHidden && $(element).show();
+      const isOfftop = $(element).offset().top < $(window).scrollTop();
+      elementIsHidden && $(element).css('display', '');
+      return isOfftop;
+    },
+    'off-right': function (element) {
+      const elementIsHidden = $(element).css('display') === 'none';
+      elementIsHidden && $(element).show();
+      const isOffright = $(element).offset().left + $(element).outerWidth() - $(window).scrollLeft() >= $(window).width();
+      elementIsHidden && $(element).css('display', '');
+      return isOffright;
+    },
+    'off-bottom': function (element) {
+      const elementIsHidden = $(element).css('display') === 'none';
+      elementIsHidden && $(element).show();
+      const isOffBottom = $(element).offset().top + $(element).outerHeight() - $(window).scrollTop() > $(window).height();
+      elementIsHidden && $(element).css('display', '');
+      return isOffBottom;
+    },
+    'off-left': function (element) {
+      const elementIsHidden = $(element).css('display') === 'none';
+      elementIsHidden && $(element).show();
+      const isOffLeft = $(element).offset().left < $(window).scrollLeft();
+      elementIsHidden && $(element).css('display', '');
+      return isOffLeft;
+    },
+    'off-screen': function (element) {
+      const elementIsHidden = $(element).css('display') === 'none';
+      elementIsHidden && $(element).show();
+      const isOffScreen = $(element).is(':off-top, :off-right, :off-bottom, :off-left');
+      elementIsHidden && $(element).css('display', '');
+      return isOffScreen;
+    }
+  });
+})(jQuery);
+
+// Get how much of the element is off the screen
+function getOffScreenAmount(element, displayValue = '') {
+  let currentEdgeOffset = 0;
+  $(element).show();
+  if ($(element).is(':off-top')) {
+    currentEdgeOffset = $(element).offset().top - $(window).scrollTop();
+  }
+  else if ($(element).is(':off-right')) {
+    currentEdgeOffset = $(element).offset().left + $(element).outerWidth() - $(window).scrollLeft();
+  }
+  else if ($(element).is(':off-bottom')) {
+    currentEdgeOffset = $(element).offset().top + $(element).outerHeight() - $(window).scrollTop();
+  }
+  else if ($(element).is(':off-left')) {
+    currentEdgeOffset = $(element).offset().left - $(window).scrollLeft();
+  }
+  else {
+    // console.log('Didn\'t move ', element, '. It is not off the screen');
+  }
+  $(element).css('display', displayValue);
+  return Math.abs($(window).width() - currentEdgeOffset);
+}
+
+// Move an off screen element back on screen (with an optional extra amount)
+function moveOffScreenElementBackOnScreen(element, extraOffset = 0, displayValue = '') {
+  $(element).show();
+  if ($(element).is(':off-top')) {
+    $(element).offset({ top: $(window).scrollTop() + extraOffset });
+  }
+  else if ($(element).is(':off-right')) {
+    $(element).offset({ left: $(window).scrollLeft() + $(window).width() - ($(element).outerWidth() + extraOffset) });
+  }
+  else if ($(element).is(':off-bottom')) {
+    $(element).offset({ top: $(window).scrollTop() + $(window).height() - ($(element).outerHeight() + extraOffset) });
+  }
+  else if ($(element).is(':off-left')) {
+    $(element).offset({ left: $(window).scrollLeft() + extraOffset });
+  }
+  else {
+    // console.log('Didn\'t move ', element, '. It is not off the screen');
+  }
+  $(element).css('display', displayValue);
+}
+
+// Given an element and a side (right, left, top, bottom), moves the element to be against that side of the window. Can accept multiple side (top left, bottom right, etc.)
+function placeElementAgainstWindowEdge(element, side) {
+  try {
+    $(element).show();
+    const windowWidth = $(window).width();
+    const windowHeight = $(window).height();
+    const elementWidth = $(element).width();
+    const elementHeight = $(element).height();
+    side = side.toLowerCase();
+
+    if (side.includes('right')) {
+      $(element).offset({ left: windowWidth - elementWidth });
+    }
+
+    if (side.includes('left')) {
+      $(element).offset({ left: 0 });
+    }
+
+    if (side.includes('top')) {
+      $(element).offset({ top: 0 });
+    }
+
+    if (side.includes('bottom')) {
+      $(element).offset({ top: windowHeight - elementHeight });
+    }
+
+    $(element).css('display', '');
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+// Bootstrap responsive tables
+try {
+  let allTables = $('.ccms-contentelement.ccms-contentelement-Editor').find('table');
+  allTables.addClass('table table-bordered');
+  allTables.parents('.FW_EDITOR_STYLE').addClass('table-responsive');
+}
+
+catch (error) {
+  console.log(error);
+}
+
+// Add empty alt text to school manager icons since they are only decorative
+try {
+  $('img[src*="schoolmanager.catapultcms.com/utilities/GetAssetIcon"]').add('.top-bar .top-bar-link img[src*="icons/"]').attr('alt', '');
+}
+
+catch (error) {
+  console.log(error);
+}
+
+// Skip Link
+function SkipNav() {
+  const currentUrl = window.location.href;
+  const url = currentUrl.charAt(currentUrl.length - 1) === '#' ? currentUrl.slice(0, currentUrl.length - 1) : currentUrl;
+  if (url.includes("#mainContent")) {
+    window.location.assign(url);
+  }
+  else {
+    const newURL = url + '#mainContent';
+    window.location.assign(newURL);
+  }
+}
+
+try {
+  $(document).ready(function () {
+    $("#skiptocontent").click(function (e) {
+      try {
+        e.preventDefault();
+        SkipNav();
+      }
+
+      catch (error) {
+        console.log(error);
+      }
+    });
+  });
+}
+
+catch (error) {
+  console.log(error);
+}
+
+// High Contrast Mode
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires=" + d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+let mode;
+let enabled = false;
+let scheme = '2';
+let timeoutId = null;
+let modeChangerActive = false;
+let highContrastButton = document.getElementById('highContrastSubFooter');
+let resetContrastButton = document.getElementById('resetContrastSubFooter');
+let topBarContrastButton = document.getElementById('topbarContrastButton');
+
+try {
+  enabled = getCookie("highContrastEnabled") === 'true' ? true : false;
+
+  if (enabled) {
+    if (highContrastButton && resetContrastButton) {
+      highContrastButton.style.display = 'none';
+      resetContrastButton.style.display = 'inline';
+    }
+    if (topBarContrastButton) {
+      topBarContrastButton.classList.add('high');
+    }
+  }
+
+  else {
+    if (highContrastButton && resetContrastButton) {
+      highContrastButton.style.display = 'inline';
+      resetContrastButton.style.display = 'none';
+    }
+    if (topBarContrastButton) {
+      topBarContrastButton.classList.remove('high');
+    }
+  }
+}
+
+catch (error) {
+  console.log(error);
+}
+
+window.onunload = function (e) {
+  setCookie("highContrastEnabled", enabled, 365);
+}
+
+let filterMap =
+{
+  '0': 'url("#contrast__off")',
+  '1': 'url("#contrast__highcontrast")',
+  '2': 'url("#contrast__grayscale")',
+  '3': 'url("#contrast__invert")',
+  '4': 'url("#contrast__invert_grayscale")',
+  '5': 'url("#contrast__yellow_on_black")'
+};
+
+let svgContent = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1"><defs><filter x="0" y="0" width="99999" height="99999" id="contrast__off"><feComponentTransfer><feFuncR type="table" tableValues="0 1"/><feFuncG type="table" tableValues="0 1"/><feFuncB type="table" tableValues="0 1"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__highcontrast" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="gamma" exponent="3.0"/><feFuncG type="gamma" exponent="3.0"/><feFuncB type="gamma" exponent="3.0"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__highcontrast_back" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="gamma" exponent="0.33"/><feFuncG type="gamma" exponent="0.33"/><feFuncB type="gamma" exponent="0.33"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__grayscale" filterUnits="userSpaceOnUse"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0"/><feComponentTransfer><feFuncR type="gamma" exponent="3"/><feFuncG type="gamma" exponent="3"/><feFuncB type="gamma" exponent="3"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__grayscale_back" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="gamma" exponent="0.33"/><feFuncG type="gamma" exponent="0.33"/><feFuncB type="gamma" exponent="0.33"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__invert" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="gamma" amplitude="-1" exponent="3" offset="1"/><feFuncG type="gamma" amplitude="-1" exponent="3" offset="1"/><feFuncB type="gamma" amplitude="-1" exponent="3" offset="1"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__invert_back" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="table" tableValues="1 0"/><feFuncG type="table" tableValues="1 0"/><feFuncB type="table" tableValues="1 0"/></feComponentTransfer><feComponentTransfer><feFuncR type="gamma" exponent="1.7"/><feFuncG type="gamma" exponent="1.7"/><feFuncB type="gamma" exponent="1.7"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__invert_grayscale" filterUnits="userSpaceOnUse"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0"/><feComponentTransfer><feFuncR type="gamma" amplitude="-1" exponent="3" offset="1"/><feFuncG type="gamma" amplitude="-1" exponent="3" offset="1"/><feFuncB type="gamma" amplitude="-1" exponent="3" offset="1"/></feComponentTransfer></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__yellow_on_black" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="gamma" amplitude="-1" exponent="3" offset="1"/><feFuncG type="gamma" amplitude="-1" exponent="3" offset="1"/><feFuncB type="gamma" amplitude="-1" exponent="3" offset="1"/></feComponentTransfer><feColorMatrix type="matrix" values="0.3 0.5 0.2 0 0 0.3 0.5 0.2 0 0 0 0 0 0 0 0 0 0 1 0"/></filter><filter x="0" y="0" width="99999" height="99999" id="contrast__yellow_on_black_back" filterUnits="userSpaceOnUse"><feComponentTransfer><feFuncR type="table" tableValues="1 0"/><feFuncG type="table" tableValues="1 0"/><feFuncB type="table" tableValues="1 0"/></feComponentTransfer><feComponentTransfer><feFuncR type="gamma" exponent="0.33"/><feFuncG type="gamma" exponent="0.33"/><feFuncB type="gamma" exponent="0.33"/></feComponentTransfer></filter></defs></svg>';
+
+let cssTemplate = 'html[hc="a0"] {   -webkit-filter: url("#contrast__off"); } html[hcx="0"] img[src*="jpg"], html[hcx="0"] img[src*="jpeg"], html[hcx="0"] svg image, html[hcx="0"] img.rg_i, html[hcx="0"] embed, html[hcx="0"] object, html[hcx="0"] video {   -webkit-filter: url("#contrast__off"); }  html[hc="a1"] {   -webkit-filter: url("#contrast__highcontrast"); } html[hcx="1"] img[src*="jpg"], html[hcx="1"] img[src*="jpeg"], html[hcx="1"] img.rg_i, html[hcx="1"] svg image, html[hcx="1"] embed, html[hcx="1"] object, html[hcx="1"] video {   -webkit-filter: url("#contrast__highcontrast_back"); }  html[hc="a2"] {   -webkit-filter: url("#contrast__grayscale"); } html[hcx="2"] img[src*="jpg"], html[hcx="2"] img[src*="jpeg"], html[hcx="2"] img.rg_i, html[hcx="2"] svg image, html[hcx="2"] embed, html[hcx="2"] object, html[hcx="2"] video {   -webkit-filter: url("#contrast__grayscale_back"); }  html[hc="a3"] {   -webkit-filter: url("#contrast__invert"); } html[hcx="3"] img[src*="jpg"], html[hcx="3"] img[src*="jpeg"], html[hcx="3"] img.rg_i, html[hcx="3"] svg image, html[hcx="3"] embed, html[hcx="3"] object, html[hcx="3"] video {   -webkit-filter: url("#contrast__invert_back"); }  html[hc="a4"] {   -webkit-filter: url("#contrast__invert_grayscale"); } html[hcx="4"] img[src*="jpg"], html[hcx="4"] img[src*="jpeg"], html[hcx="4"] img.rg_i, html[hcx="4"] svg image, html[hcx="4"] embed, html[hcx="4"] object, html[hcx="4"] video {   -webkit-filter: url("#contrast__invert_back"); }  html[hc="a5"] {   -webkit-filter: url("#contrast__yellow_on_black"); } html[hcx="5"] img[src*="jpg"], html[hcx="5"] img[src*="jpeg"], html[hcx="5"] img.rg_i, html[hcx="5"] svg image, html[hcx="5"] embed, html[hcx="5"] object, html[hcx="5"] video {   -webkit-filter: url("#contrast__yellow_on_black_back"); }';
+
+// Add the elements to the page that make high-contrast adjustments possible.
+function addOrUpdateExtraElements() {
+  if (!enabled) {
+    return;
+  }
+
+  let style = document.getElementById('hc_style');
+  if (!style) {
+    let baseUrl = window.location.href.replace(window.location.hash, '');
+    baseUrl = baseUrl.replace('#', '');
+    let css = cssTemplate.replace(/#/g, baseUrl + '#');
+    style = document.createElement('style');
+    style.id = 'hc_style';
+    style.setAttribute('type', 'text/css');
+    style.innerHTML = css;
+    document.head.appendChild(style);
+  }
+
+  let bg = document.getElementById('contrast__bkgnd');
+  if (!bg) {
+    bg = document.createElement('div');
+    bg.id = 'contrast__bkgnd';
+    bg.style.position = 'fixed';
+    bg.style.left = '0px';
+    bg.style.top = '0px';
+    bg.style.right = '0px';
+    bg.style.bottom = '0px';
+    bg.style.zIndex = -1999999999;
+    document.body.appendChild(bg);
+  }
+  bg.style.display = 'block';
+  bg.style.background = window.getComputedStyle(document.body).background;
+
+  // As a special case, replace a zero-alpha background with white,
+  // otherwise we can't invert it.
+  let c = bg.style.backgroundColor;
+  c = c.replace(/\s\s*/g, '');
+  if (m = /^rgba\(([\d]+),([\d]+),([\d]+),([\d]+|[\d]*.[\d]+)\)/.exec(c)) {
+    if (m[4] == '0') {
+      bg.style.backgroundColor = '#fff';
+    }
+  }
+
+  // Add a hidden element with the SVG filters.
+  let wrap = document.getElementById('contrast__svg_filters');
+  if (wrap)
+    return;
+
+  wrap = document.createElement('span');
+  wrap.id = 'contrast__svg_filters';
+  wrap.setAttribute('hidden', '');
+  wrap.innerHTML = svgContent;
+  document.body.appendChild(wrap);
+}
+
+
+// This is called on load and every time the mode might have changed
+// (i.e. enabling/disabling, or changing the type of contrast adjustment
+// for this page).
+function Update() {
+  let html = document.documentElement;
+  if (enabled) {
+
+    if (!document.body) {
+      window.setTimeout(Update, 100);
+      return;
+    }
+    addOrUpdateExtraElements();
+    if (html.getAttribute('hc') != mode + scheme)
+      html.setAttribute('hc', mode + scheme);
+    if (html.getAttribute('hcx') != scheme)
+      html.setAttribute('hcx', scheme);
+
+    if (window == window.top) {
+      window.scrollBy(0, 1);
+      window.scrollBy(0, -1);
+    }
+  }
+
+  else {
+    html.setAttribute('hc', mode + '0');
+    html.setAttribute('hcx', '0');
+    window.setTimeout(function () {
+      html.removeAttribute('hc');
+      html.removeAttribute('hcx');
+      let bg = document.getElementById('contrast__bkgnd');
+      if (bg)
+        bg.style.display = 'none';
+    }, 0);
+  }
+}
+
+function ChangeMode(event) {
+  if (enabled) {
+    if (event.defaultPrevented) {
+      return; // Do nothing if the event was already processed
+    }
+
+    switch (event.code) {
+      case "Digit0":
+      case "Numpad0":
+        scheme = 0;
+        break;
+      case "Digit1":
+      case "Numpad1":
+        scheme = 1;
+        break;
+      case "Digit2":
+      case "Numpad2":
+        scheme = 2;
+        break;
+      case "Digit3":
+      case "Numpad3":
+        scheme = 3;
+        break;
+      case "Digit4":
+      case "Numpad4":
+        scheme = 4;
+        break;
+      case "Digit5":
+      case "Numpad5":
+        scheme = 5;
+        break;
+      default:
+        return; // Quit when this doesn't handle the key event.
+    }
+    Update();
+
+    // Cancel the default action to avoid it being handled twice
+    event.preventDefault();
+  }
+}
+
+function ToggleContrast(event) {
+  // event.preventDefault();
+  enabled = !enabled;
+
+  if (enabled) {
+    if (highContrastButton && resetContrastButton) {
+      highContrastButton.style.display = 'none';
+      resetContrastButton.style.display = 'inline';
+    }
+    if (topBarContrastButton) {
+      topBarContrastButton.classList.add('high');
+    }
+  }
+
+  else {
+    if (highContrastButton && resetContrastButton) {
+      highContrastButton.style.display = 'inline';
+      resetContrastButton.style.display = 'none';
+    }
+    if (topBarContrastButton) {
+      topBarContrastButton.classList.remove('high');
+    }
+  }
+  Update();
+}
+
+function topBarContrastKeydown(event) {
+  if (event.code === 'Space' || event.code === 'Enter') {
+    ToggleContrast();
+  }
+}
+
+function init() {
+  if (window == window.top) {
+    mode = 'a';
+  }
+
+  else {
+    mode = 'b';
+  }
+
+  // Update again after a few seconds and again after load so that
+  // the background isn't wrong for long.
+  window.setTimeout(addOrUpdateExtraElements, 2000);
+  window.addEventListener('load', function () {
+    highContrastButton = document.getElementById('highContrastSubFooter');
+    resetContrastButton = document.getElementById('resetContrastSubFooter');
+    topBarContrastButton = document.getElementById('topbarContrastButton');
+    addOrUpdateExtraElements();
+
+    highContrastButton && highContrastButton.addEventListener("click", ToggleContrast);
+    resetContrastButton && resetContrastButton.addEventListener("click", ToggleContrast);
+    topBarContrastButton && topBarContrastButton.addEventListener("click", ToggleContrast) && topBarContrastButton.addEventListener("keydown", topBarContrastKeydown);
+    if (modeChangerActive) {
+      document.addEventListener("keydown", ChangeMode);
+    }
+    // Also Update when the document body attributes change.
+    let config = { attributes: true, childList: false, characterData: false };
+    let observer = new MutationObserver(function (mutations) {
+      addOrUpdateExtraElements();
+    });
+    observer.observe(document.body, config);
+  });
+}
+
+try {
+  init();
+}
+
+catch (error) {
+  console.log(error);
+}
+
+try {
+  Update();
+}
+
+catch (error) {
+  console.log(error);
+}
+
+(function ($, sr) {
+  var debounce = function (func, threshold, execAsap) {
+    var timeout;
+
+    return function debounced() {
+      var obj = this, args = arguments;
+      function delayed() {
+        if (!execAsap)
+          func.apply(obj, args);
+        timeout = null;
+      };
+
+      if (timeout)
+        clearTimeout(timeout);
+      else if (execAsap)
+        func.apply(obj, args);
+
+      timeout = setTimeout(delayed, threshold || 100);
+    };
+  }
+
+  jQuery.fn[sr] = function (fn) { return fn ? this.bind('resize', debounce(fn)) : this.trigger(sr); };
+
+})(jQuery, 'debouncedResize');
+
+// Scrolling animations
+function scrollAnimationIntersectionCallback(entries) {
+  entries.forEach(function (entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('scroll-animation-active');
+    }
+  });
+}
+
+function scrollAnimation() {
+  try {
+    elementsForScrollAnimation && $(window).width() > 768 && elementsForScrollAnimation.forEach(element => $(element).addClass('scroll-animation bottom fade-in'));
+
+    let options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5
+    }
+
+    let observer = new IntersectionObserver(scrollAnimationIntersectionCallback, options);
+
+    let scrollAnimationTargets = document.querySelectorAll('.scroll-animation');
+    scrollAnimationTargets.forEach((element) => {
+      observer.observe(element);
+    });
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+window.addEventListener('load', (event) => {
+  scrollAnimation()
+});

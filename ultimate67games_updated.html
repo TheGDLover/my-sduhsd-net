@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <title>Ultimate 6'7 Games</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
+    h1 {
+      margin: 20px 0;
+      font-size: 2.5em;
+    }
+    .game-button {
+      display: inline-block;
+      margin: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .game-button:hover {
+      background: #444;
+    }
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+  </style>
+<style type="text/css" id="operaUserStyle"></style></head>
+<body>
+  <div id="particles-js"><canvas class="particles-js-canvas-el" width="1860" height="925" style="width: 100%; height: 100%;"></canvas></div>
+  <h1>Ultimate 6'7 Games</h1>
+<div style="display: flex; justify-content: center; margin: 20px 0;">
+  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe141_yvcfh3UJFkAovm8ZJSLz5qYBIhZf_FvgiSXPoWiey5Q/viewform?embedded=true" width="500" height="600" frameborder="0" marginheight="0" marginwidth="0" style="border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+    Loading…
+  </iframe>
+</div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {"value": 80, "density": {"enable": true, "value_area": 800}},
+        "color": {"value": "#ffffff"},
+        "shape": {"type": "circle"},
+        "opacity": {"value": 0.5, "random": false},
+        "size": {"value": 3, "random": true},
+        "line_linked": {"enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1},
+        "move": {"enable": true, "speed": 6, "direction": "none", "random": false, "straight": false, "out_mode": "out"}
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {"enable": true, "mode": "repulse"},
+          "onclick": {"enable": true, "mode": "push"},
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+
+    function openGame(url) {
+      var win = window.open();
+      win.document.write('<iframe src="' + url + '" frameborder="0" style="width:100%;height:100%;border:none;"></iframe>');
+    }
+  </script>
+
+<script>
+  let secretCode = "siks67";
+  let inputBuffer = "";
+
+  document.addEventListener("keydown", function(e) {
+    inputBuffer += e.key.toLowerCase();
+    if (inputBuffer.length > secretCode.length) {
+      inputBuffer = inputBuffer.slice(-secretCode.length);
+    }
+    if (inputBuffer === secretCode) {
+      showAdminButtons();
+    }
+  });
+
+  function showAdminButtons() {
+    if (document.getElementById("adminPanel")) return; // avoid duplicates
+
+    let panel = document.createElement("div");
+    panel.id = "adminPanel";
+    panel.style.margin = "20px";
+
+    let newBtn = document.createElement("button");
+    newBtn.textContent = "New Game(s)";
+    newBtn.className = "game-button";
+    newBtn.onclick = function() {
+      let textInput = prompt(
+        "Paste games in format:\nGame Name<TAB or spaces>https://link.com\nOne per line."
+      );
+      if (textInput) {
+        let lines = textInput.split("\n");
+        lines.forEach(line => {
+          let parts = line.trim().split(/\s+/); // split by whitespace
+          if (parts.length >= 2) {
+            let name = parts.slice(0, parts.length - 1).join(" ");
+            let url = parts[parts.length - 1];
+            let btn = document.createElement("button");
+            btn.className = "game-button";
+            btn.textContent = name;
+            btn.setAttribute("onclick", "openGame('" + url + "')");
+            document.body.insertBefore(btn, panel);
+          }
+        });
+      }
+    };
+
+    let delBtn = document.createElement("button");
+    delBtn.textContent = "Delete Game";
+    delBtn.className = "game-button";
+    delBtn.onclick = function() {
+      let gameName = prompt("Enter the exact name of the game button to delete (or type 'all' to remove everything):");
+      if (!gameName) return;
+
+      if (gameName.toLowerCase() === "all") {
+        let confirmAll = prompt("Are you sure? Type all again to confirm.");
+        if (confirmAll && confirmAll.toLowerCase() === "all") {
+          document.querySelectorAll(".game-button").forEach(btn => {
+            if (
+              !["New Game(s)", "Delete Game", "Edit Game", "Download Website"].includes(btn.textContent)
+            ) {
+              btn.remove();
+            }
+          });
+        }
+        return;
+      }
+
+      let buttons = document.querySelectorAll(".game-button");
+      buttons.forEach(btn => {
+        if (
+          btn.textContent.trim() === gameName &&
+          !["New Game(s)", "Delete Game", "Edit Game", "Download Website"].includes(btn.textContent)
+        ) {
+          btn.remove();
+        }
+      });
+    };
+
+    let editBtn = document.createElement("button");
+    editBtn.textContent = "Edit Game";
+    editBtn.className = "game-button";
+    editBtn.onclick = function() {
+      let gameName = prompt("Enter the exact name of the game button to edit:");
+      if (gameName) {
+        let btn = Array.from(document.querySelectorAll(".game-button")).find(
+          b =>
+            b.textContent.trim() === gameName &&
+            !["New Game(s)", "Delete Game", "Edit Game", "Download Website"].includes(b.textContent)
+        );
+        if (btn) {
+          let newName = prompt("Enter new name:", btn.textContent);
+          let currentLink = btn
+            .getAttribute("onclick")
+            .match(/'(.*?)'/)[1];
+          let newLink = prompt("Enter new link (URL):", currentLink);
+          if (newName) btn.textContent = newName;
+          if (newLink) btn.setAttribute("onclick", "openGame('" + newLink + "')");
+        }
+      }
+    };
+
+    
+    
+    let dlBtn = document.createElement("button");
+    dlBtn.textContent = "Download Website";
+    dlBtn.className = "game-button";
+    dlBtn.onclick = function() {
+      var adminPanel = document.getElementById('adminPanel');
+      var storedPanel = null;
+      var panelParent = null;
+      var panelNext = null;
+      if (adminPanel) {
+        panelParent = adminPanel.parentNode;
+        panelNext = adminPanel.nextSibling;
+        storedPanel = adminPanel;
+        panelParent.removeChild(adminPanel);
+      }
+
+      var adminNames = ["New Game(s)", "Delete Game", "Edit Game", "Download Website"];
+      var removedBtns = [];
+      document.querySelectorAll('.game-button').forEach(function(btn) {
+        if (adminNames.indexOf(btn.textContent.trim()) !== -1) {
+          removedBtns.push({btn: btn, parent: btn.parentNode, next: btn.nextSibling});
+          btn.parentNode.removeChild(btn);
+        }
+      });
+
+      var source = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      var blob = new Blob([source], { type: 'text/html' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ultimate67games_updated.html';
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(function() {
+        try { URL.revokeObjectURL(a.href); } catch(e){}
+        a.remove();
+        if (storedPanel && panelParent) {
+          if (panelNext) panelParent.insertBefore(storedPanel, panelNext);
+          else panelParent.appendChild(storedPanel);
+        }
+        for (var i = 0; i < removedBtns.length; i++) {
+          var r = removedBtns[i];
+          if (r.next) r.parent.insertBefore(r.btn, r.next);
+          else r.parent.appendChild(r.btn);
+        }
+      }, 120);
+    };
+
+
+
+      panel.appendChild(newBtn);
+    panel.appendChild(delBtn);
+    panel.appendChild(editBtn);
+    panel.appendChild(dlBtn);
+
+    document.body.appendChild(panel);
+}
+
+</script>
+
+
+
+<button class="game-button" onclick="openGame('https://falling-reliable-wolf-840.vscodeedu.app/')">Particles.js</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/liquid.html')">Liquid thingy</button><button class="game-button" onclick="openGame('https://bouncyballs.org/')">Bouncy Balls</button><button class="game-button" onclick="openGame('https://www.fotmob.com/')">FotMob</button><button class="game-button" onclick="openGame('https://www.worldguessr.com/')">WorldGuessr</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/1v1.html')">1v1.lol</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/poly.html')">Polytrack</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/1v1soccer.html')">1v1 soccer</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/basketball.html')">Basket Random</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/blocks.html')">Block Blast</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/tanks.html')">Awesome Tanks</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/tanks2.html')">Awesome Tanks 2</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/infcraft.html')">Infinite Craft</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/snowball.html')">Snowball.io</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/slither.html')">Slither.io</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/snipers.html')">Rooftop Snipers</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/boxing.html')">Boxing Random</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/basketlegends.html')">Basket Legends</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/darkroom.html')">A Firelit Room</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/pool.html')">Pool</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/hole.html')">Hole.io HD</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/kong.html')">King Kong</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/nogame.html')">There Is No Game</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/qwop.html')">Qwop</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/cookie.html')">Cookie Clicker</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/coreball.html')">CoreBall</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/doodle.html')">Doodle</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/drift.html')">Drift Boss</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/smashbros.html')">Smash Brothers</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/pokeruby.html')">Pokemon Ruby</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/pokeemerald.html')">Pokemon Emerald</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/pokeplatinum.html')">Pokemon Platinum</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/bitlife.html')">BitLife</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/granny2.html')">Granny 2</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/helix.html')">Helix Jump</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/ngon.html')">Ngon</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/vex6.html')">Vex 6</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/vex7.html')">Vex 7</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/vex8.html')">Vex 8</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/fireboy.html')">Fireboy and Watergirl</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/fnaf.html')">FNAF 1</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/friday.html')">Friday Night Funkin'</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/happywheels.html')">Happy Wheels</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/index.html')">The Binding of Isaac</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/learnfly.html')">Learn To Fly 1</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/learnfly3.html')">Learn To Fly 3</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/mariods.html')">Mario Kart DS</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/moto2.html')">Moto 2</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/moto3.html')">Moto 3</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/ovo2.html')">Ovo 2</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/run.html')">Run 1</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/run3.html')">Run 3</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/shoot.html')">Shoot</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/slope.html')">Slope</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/slopemult.html')">Slope Multiplayer</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/snowalt.html')">Snow Rider</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/soccer.html')">Soccer Random</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/solitaire.html')">Solitare</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/suika.html')">Suika</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/suikapico.html')">Suika 8-Bit</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/supermario.html')">Super Mariokart</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/supermario64.html')">Super Mario 64 DS</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/temple.html')">Temple Run</button><button class="game-button" onclick="openGame('https://vague-fern-robot-549.vscodeedu.app/tetris.html')">Tetris</button></body></html>

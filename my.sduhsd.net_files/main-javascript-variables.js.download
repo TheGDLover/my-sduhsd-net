@@ -1,0 +1,42 @@
+// 2022-12-06
+
+// #region Top Bar variables
+const schoolDropdownTypes = {
+  Standard: "standard",
+  StandardGrouped: "standardGrouped",
+  Search: "search",
+  Quicklinks: "quicklinks",
+  None: "none"
+}
+
+const schoolDropdownType = schoolDropdownTypes.Search;
+
+const useOurSchoolsQuicklinks = true;
+
+const openTranslateInNewWindow = false;
+
+// #endregion
+
+// #region C-jump-links-v1.js variables
+const showJumpLinks = false;
+
+// jumpLinkList object property names are the HTML ID the link should scroll to
+// jumpLinkList object property values are the strings displayed in the jump links on the site
+const jumpLinkList = {
+  'top': 'Home',
+  'main': 'Spotlight',
+  'announcement-scroll-section': 'Announcements',
+  'events-scroll-section': 'Events',
+  'superintendent-scroll-section': 'Our Mission',
+  'app-bar-scroll-section': 'App',
+  // 'footer': ['Contact Us', 'Social']
+}
+
+// #endregion
+
+// #region C-footer-v2.js variables
+
+// Footer quicklinks
+const useDiamonds = false;
+
+//#endregion

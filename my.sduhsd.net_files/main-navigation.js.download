@@ -1,0 +1,754 @@
+// ==========================================================================
+// 2024-02-15
+// ==========================================================================
+
+if (!navigationType) {
+  console.log("Navigation Type is not selected");
+}
+
+if (!mobileNavigationType) {
+  console.log("Mobile Navigation Type is not selected");
+}
+
+const CheckMobile = (sizeToCheck = 992, useSizeToCheckParameter = false) => {
+  if (!useSizeToCheckParameter) {
+    switch (mobileNavigationExpandSize) {
+      case mobileNavigationExpandSizes.None:
+        sizeToCheck = 0;
+        break;
+      case mobileNavigationExpandSizes.Small:
+        sizeToCheck = 556;
+        break;
+      case mobileNavigationExpandSizes.Medium:
+        sizeToCheck = 748;
+        break;
+      case mobileNavigationExpandSizes.Large:
+        sizeToCheck = 992;
+        break;
+      case mobileNavigationExpandSizes.ExtraLarge:
+        sizeToCheck = 1200;
+        break;
+      case mobileNavigationExpandSizes.ExtraExtraLarge:
+        sizeToCheck = 1400;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return $(window).width() < sizeToCheck;
+};
+
+// Quick change expand to lg for testing
+$(".navbar.navbar-expand-md").removeClass("navbar-expand-md").addClass(`navbar-expand-${mobileNavigationExpandSize}`);
+
+let didThePrependAppend = false;
+
+const offCanvasToggle = `<button class="navbar-toggler d-inline-flex d-${mobileNavigationExpandSize}-none mobile-nav-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation">
+                                        <div class="mobile-nav-toggle-icon"><span class="navbar-toggler-icon"><div></div></span></div>
+                                    </button>`;
+
+const mobileSearchBar = `<div id="mobileSearchBar" class="search-bar d-block d-lg-none">
+  <form action="Site-Search/index.html" method="get">
+    <label class="site-search-label">
+      <span class="ada">Search</span>
+      <input id="siteSearchInput" name="search_string" type="text" value="Search" placeholder="Search" onclick="if (this.value == 'Search') {this.value = '';}" onblur="if (this.value == '') {this.value = 'Search';}">
+    </label>
+    <button class="mobile-search-submit-button" type="submit" onclick="forms.freedom_search_form.referring_page_url.value=location.href;forms.freedom_search_form.submit();" value="Search Site" alt="Search"><i class="fa fa-search" aria-hidden="true"></i><span class="ada">Submit</span></button>
+  </form>
+</div>`;
+
+function MobileNavInHeader() {
+  if (!separateMobileNav) {
+    $(".navigation").after(offCanvasToggle);
+    $(".navigation .navbar-toggler").hide();
+  }
+  $(".navigation .offcanvas > .offcanvas-body").prepend(mobileSearchBar);
+}
+function topbarGridSlickInitialized() {
+  if (CheckMobile()) {
+    const subpageOffCanvasHeaderHeight = $(".offcanvas-header.subpage-offcanvas-header").height();
+    const subpageOffCanvasHeaderDifference = subpageOffCanvasHeaderHeight / 2;
+    const subpageOffCanvasHeaderPadding =
+      $(".navbar-toggler").offset().top + $(".navbar-toggler").outerHeight() / 2 - subpageOffCanvasHeaderDifference;
+    $(".offcanvas-header.subpage-offcanvas-header").css("padding-top", subpageOffCanvasHeaderPadding);
+    $(".navigation > .navbar > .offcanvas > .offcanvas-body").css("padding-top", $(".top-bar-header").outerHeight());
+  }
+}
+
+function MobilePlacement() {
+  if ($(".top-bar-grid").hasClass("slick-initialized")) {
+    topbarGridSlickInitialized();
+  } else {
+    $(".top-bar-grid").on("init", function (slick) {
+      topbarGridSlickInitialized();
+    });
+  }
+
+  $(".top-bar-grid").on("destroy", function (slick) {
+    if (!CheckMobile()) {
+      $(".navigation > .navbar > .offcanvas > .offcanvas-body").css("padding-top", "");
+    }
+  });
+}
+
+function CheckSeparateMobileNav() {
+  if (!separateMobileNav && CheckMobile()) {
+    $(".navigation").css("height", "0");
+    $(".top-bar-title-wrapper").addClass("hamburger-nav-padding");
+  } else {
+    $(".navigation").css("height", "");
+    $(".top-bar-title-wrapper").removeClass("hamburger-nav-padding");
+  }
+}
+
+const offCanvasHeader = `<div class="offcanvas-header main-offcanvas-header">
+                              <!-- <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5> -->
+                              <!-- <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button> -->
+                           </div>`;
+$(".navbar .navbar-toggler").attr("data-bs-toggle", "offcanvas");
+$("#mainNavigation").removeClass("collapse navbar-collapse").addClass(`offcanvas ${mobileOffCanvasNavigationSide}`).attr("data-bs-backdrop", "false");
+$("#mainNavigation > .navbar-nav").wrap('<div class="offcanvas-body" />');
+
+function OffCanvasMobileNav() {
+  if (mobileNavigationType === mobileNavigationTypes.OffCanvas && CheckMobile()) {
+    $("#mainNavigation .nav-item > i:not(.more-dropdown-ellipsis)").addClass("mobile-dropdown-arrow");
+    const allDropdownToggles = $(".mobile-dropdown-arrow");
+    const subOffCanvasHeader = `<div class="offcanvas-header subpage-offcanvas-header">
+                              <!-- <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5> -->
+                              <button type="button" class="text-reset mobile-nav-off-canvas-back-button" data-bs-dismiss="offcanvas" aria-label="Back"><i class="fa-thin fa-angle-left"></i></button>
+                           </div>`;
+
+    if (!didThePrependAppend) {
+      $("#mainNavigation .dropdown-menu")
+        .addClass(`offcanvas ${mobileOffCanvasNavigationSide}`)
+        .attr("data-bs-backdrop", "false")
+        .removeClass("dropdown-menu")
+        .prepend(subOffCanvasHeader);
+    } else {
+      $("#mainNavigation .dropdown-menu")
+        .addClass(`offcanvas ${mobileOffCanvasNavigationSide}`)
+        .attr("data-bs-backdrop", "false")
+        .removeClass("dropdown-menu");
+    }
+
+    try {
+      $(".mobile-dropdown-arrow").attr("tabindex", "0");
+    } catch (error) {
+      console.log(error);
+    }
+
+    $(".subpage-offcanvas-header").each(function (index) {
+      const linkText = $(this).parent(".mobile-dropdown").siblings("a").text();
+      if (!didThePrependAppend) {
+        $(this).append(`<div class="subpage-offcanvas-header-link-text">${linkText}</div>`);
+      }
+    });
+
+    $(allDropdownToggles).each(function (index) {
+      $(this).attr("offcanvas-target", `offcanvas-toggle-${index}`);
+      $(this).parent("a").siblings(".mobile-dropdown").attr("id", `offcanvas-toggle-${index}`);
+      $(this).siblings(".mobile-dropdown").attr("id", `offcanvas-toggle-${index}`);
+    });
+
+    $(".mobile-dropdown-arrow").on("click keydown", function (event) {
+      if (event.type === "click" || (event.type === "keydown" && event.key === "Enter")) {
+        try {
+          if (event.type === "click") {
+            event.preventDefault();
+          }
+
+          if (event.type === "keydown") {
+            if (event.key !== "Enter") {
+              return;
+            }
+          }
+
+          const thisTarget = $(this).attr("offcanvas-target");
+          const myOffcanvas = document.getElementById(thisTarget);
+          const bsOffcanvas = new bootstrap.Offcanvas(myOffcanvas);
+          bsOffcanvas.show();
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    });
+
+    didThePrependAppend = true;
+  } else {
+    $(`.offcanvas .${mobileOffCanvasNavigationSide}`).removeClass(`offcanvas ${mobileOffCanvasNavigationSide}`).attr("data-bs-backdrop", "");
+    $("#mainNavigation .more-dropdown > ul").addClass("dropdown-menu");
+    $("#mainNavigation .nav-link > i").removeClass("mobile-dropdown-arrow");
+  }
+}
+
+function NavigationSocialLinks() {
+  const facebookLink = $(".navigation-social .social-facebook")[0].dataset.navigationSocial?.trim();
+  const twitterLink = $(".navigation-social .social-twitter")[0].dataset.navigationSocial?.trim();
+  const instagramLink = $(".navigation-social .social-instagram")[0].dataset.navigationSocial?.trim();
+  const linkedInLink = $(".navigation-social .social-linkedin")[0].dataset.navigationSocial?.trim();
+  const youtubeLink = $(".navigation-social .social-youtube")[0].dataset.navigationSocial?.trim();
+
+  const parallelogramFooterLinks = $(".parallelogram-footer-link");
+  let socialLinksObject = {};
+  const socialWebsites = ["facebook", "twitter", "instagram", "linkedin", "youtube"];
+
+  $(parallelogramFooterLinks).each(function (index) {
+    let thisLinksHREF = $(this).attr("href").trim();
+
+    for (let i = 0; i < socialWebsites.length; i++) {
+      if (thisLinksHREF.includes(socialWebsites[i])) {
+        socialLinksObject[socialWebsites[i]] = thisLinksHREF;
+      }
+    }
+  });
+
+  const socialLinks = `<a class="navigation-social-link" href="${
+    socialLinksObject.facebook || facebookLink
+  }" target="_blank"><span class="ada">Facebook</span><i class="fa-brands fa-facebook-square"></i></a>
+                         <a class="navigation-social-link" href="${
+                           socialLinksObject.twitter || twitterLink
+                         }" target="_blank"><span class="ada">Twitter</span><i class="fa-brands fa-twitter-square"></i></a>
+                         <a class="navigation-social-link" href="${
+                           socialLinksObject.instagram || instagramLink
+                         }" target="_blank"><span class="ada">Instagram</span><i class="fa-brands fa-instagram"></i></a>
+                         <a class="navigation-social-link" href="${
+                           socialLinksObject.linkedin || linkedInLink
+                         }" target="_blank"><span class="ada">Linked In</span><i class="fa-brands fa-linkedin-in"></i></a>
+                         <a class="navigation-social-link" href="${
+                           socialLinksObject.youtube || youtubeLink
+                         }" target="_blank"><span class="ada">Youtube</span><i class="fa-brands fa-youtube"></i></a>`;
+
+  const desktopSocial = `<li class="inside-more-dropdown more-dropdown-social d-none d-lg-block"><div class="more-dropdown-social-text">CONNECT WITH US</div>${socialLinks}</li>`;
+  const mobileSocial = `<li class="mobile-navigation-social d-block d-lg-none">${socialLinks}</li>`;
+
+  $(".navbar .navbar-nav").append(mobileSocial);
+  $(".more-dropdown .dropdown-menu").append(desktopSocial);
+
+  const navigationSocialLinks = $(".navigation-social-link");
+  let navigationSocialLinksExist = false;
+  $(navigationSocialLinks).each(function (index) {
+    const currentHref = $(this).attr("href");
+    if (currentHref && currentHref !== "undefined") {
+      navigationSocialLinksExist = true;
+    }
+  });
+
+  navigationSocialLinksExist || $(".more-dropdown-social-text").hide();
+}
+
+const navItemsWithDropdowns = $(".navbar-nav .dropdown-menu").parent(".nav-item");
+const firstLevelNavItems = $(".navbar-nav > .nav-item");
+const firstLevelDropdowns = $(firstLevelNavItems).children(".dropdown-menu");
+const secondLevelDropdowns = $(firstLevelDropdowns).find("> li > .dropdown-menu");
+const thirdLevelDropdowns = $(secondLevelDropdowns).find("> li > .dropdown-menu");
+const fourthLevelDropdowns = $(thirdLevelDropdowns).find("> li > .dropdown-menu");
+$(navItemsWithDropdowns).addClass("dropdown");
+$(navItemsWithDropdowns).find("> .nav-link").addClass("dropdown-toggle").attr("data-bs-toggle", "dropdown").attr("data-bs-auto-close", "outside");
+$(firstLevelNavItems).addClass("first-level-nav-item");
+$(firstLevelDropdowns).addClass("first-level-dropdown");
+$(secondLevelDropdowns).addClass("second-level-dropdown");
+$(thirdLevelDropdowns).addClass("third-level-dropdown");
+$(fourthLevelDropdowns).addClass("fourth-level-dropdown");
+
+try {
+  $(firstLevelNavItems).each(function (index) {
+    let thisNavItemsHREF = $(this).children("a.nav-link").attr("href");
+
+    if (thisNavItemsHREF === "index.html") {
+      $(this).addClass("nav-home-link");
+
+      if (!showHome) {
+        $(this).addClass("hide-home-link");
+        numberOfTopNavItems++;
+      }
+
+      return false;
+    }
+  });
+
+  let navLinkWidths = 0;
+  let navWidth = $(".navigation").innerWidth() - 100;
+  const navItemPadding = CheckMobile(1200, true) ? 30 : 64;
+
+  if (autoNavWidth && CheckMobile(1700, true) && $(window).width() > 992) {
+    $(firstLevelNavItems).each(function (index) {
+      let currentNavLinksWidth = $(this).innerWidth() + navItemPadding;
+      if ($(this).find(".second-level-dropdown")) {
+        currentNavLinksWidth += 30;
+      }
+
+      navLinkWidths += currentNavLinksWidth;
+      if (navLinkWidths >= navWidth) {
+        numberOfTopNavItems = index;
+        return false;
+      }
+    });
+  }
+
+  if ((useMoreDropdown && firstLevelNavItems.length > numberOfTopNavItems) || allowSingleMoreDropdownLink) {
+    $(firstLevelNavItems).each(function (index) {
+      if (index < numberOfTopNavItems - 1) {
+        $(this).addClass(`top-level-nav`);
+      } else {
+        $(this).addClass("inside-more-dropdown").removeClass("nav-item first-level-nav-item");
+        $(this).children("a").removeClass("nav-link dropdown-toggle").addClass("dropdown-item").attr("data-bs-toggle", "");
+      }
+    });
+
+    $(".inside-more-dropdown").wrapAll('<li class="nav-item dropdown more-dropdown top-level-nav"><ul class="dropdown-menu"></ul></li>');
+    if (CheckMobile()) {
+      $(".more-dropdown ul").addClass("first-level-dropdown");
+    } else {
+      $(".more-dropdown ul").removeClass("first-level-dropdown");
+    }
+
+    $(".more-dropdown").prepend(
+      '<a class="nav-link dropdown-toggle" href="javascript:void(0);" target="_self" data-bs-toggle="dropdown" data-bs-display="static">More<i class="fa-regular fa-ellipsis-vertical more-dropdown-ellipsis"></i></a>'
+    );
+  } else {
+    $(firstLevelNavItems).each(function (index) {
+      $(this).addClass(`top-level-nav`);
+    });
+  }
+
+  $(".first-level-dropdown").each(function (index) {
+    if ($(this).find(".second-level-dropdown").length <= 0 && !twoLevelNav) {
+      $(this).addClass("no-second-level");
+    } else if (twoLevelNav) {
+      $(this).addClass("no-second-level");
+      $(this).find(".second-level-dropdown").addClass("d-lg-none");
+    }
+  });
+
+  if (!useTopLevelNavDividers) {
+    $(".navigation .navbar .navbar-nav").addClass("no-dividers");
+  }
+} catch (error) {
+  console.log(error);
+}
+
+function MorePagesInDropdowns() {
+  if (useMoreInDropdowns && !CheckMobile()) {
+    $(firstLevelDropdowns).each(function (index) {
+      const thisDropdownsSubPages = $(this).find("> li");
+      const hasSecondLevelDropdowns = !$(this).hasClass("no-second-level");
+      if ($(thisDropdownsSubPages).length > numberOfDropdownNavItems + 1 && hasSecondLevelDropdowns) {
+        $(thisDropdownsSubPages).each(function (index) {
+          if (index > numberOfDropdownNavItems - 1) {
+            $(this).addClass("under-more-subpage");
+            $(this).find(".second-level-dropdown").hide();
+          }
+        });
+        $(this).find(".under-more-subpage").wrapAll('<li class="more-subpages-container"><ul class="second-level-dropdown"></ul></li>');
+        $(this)
+          .find(".more-subpages-container")
+          .prepend(
+            '<span class="dropdown-item more-subpages-text">More Pages<i class="fa-regular fa-ellipsis-vertical more-subpages-ellipsis"></i></span>'
+          );
+      }
+    });
+  }
+}
+
+const firstLevelNavItemsWithDropdowns = $(".top-level-nav.dropdown > .dropdown-toggle");
+
+$(firstLevelNavItemsWithDropdowns).on("show.bs.dropdown", function (event) {
+  mobileNavigationType !== mobileNavigationTypes.OffCanvas || (!CheckMobile() && $(this).find("> i").toggleClass("fa-angle-down fa-angle-up"));
+});
+
+$(firstLevelNavItemsWithDropdowns).on("hide.bs.dropdown", function (event) {
+  mobileNavigationType !== mobileNavigationTypes.OffCanvas || (!CheckMobile() && $(this).find("> i").toggleClass("fa-angle-down fa-angle-up"));
+});
+
+// Mobile
+// Toggle the class mobile-nav-active when the mobile nav toggler is clicked
+function MobileNavIconToX() {
+  $(".navbar-toggler").click(function (event) {
+    try {
+      $("body").css("padding-right", "");
+      if ($(this).find(".navbar-toggler-icon").hasClass("mobile-nav-active")) {
+        $(".navigation .offcanvas").each(function () {
+          const thisOne = bootstrap.Offcanvas.getInstance(this);
+          thisOne?.hide();
+        });
+      }
+      mobileNavTogglerToX && $(".navbar-toggler-icon").toggleClass("mobile-nav-active");
+    } catch (error) {
+      console.log(error);
+    }
+  });
+}
+
+// Adds Font Awesome Bullets to nav items with dropdowns
+function FontAwesomeNavigationBullets() {
+  try {
+    const mobileDropdownArrow =
+      '<i class="fa-thin fa-angle-right nav-link dropdown-toggle mobile-dropdown-arrow" data-bs-toggle="dropdown" data-bs-auto-close="outside"></i>';
+    $(".dropdown-menu.third-level-dropdown").parent("li").prepend(mobileDropdownArrow);
+    $(".dropdown-menu.fourth-level-dropdown").parent("li").prepend(mobileDropdownArrow);
+    $(".second-level-dropdown").addClass("fa-ul");
+    $(".second-level-dropdown > li").prepend(
+      `<span class="fa-li d-none d-${mobileNavigationExpandSize}-inline-block"><i class="fa-thin fa-angle-right"></i></span>`
+    );
+    $('.top-level-nav:not(".nav-home-link") > .nav-link').after(`<i class="fa-thin fa-angle-right d-${mobileNavigationExpandSize}-none"></i>`);
+    $('.top-level-nav:not(".nav-home-link"):not(".more-dropdown") > .nav-link').append(
+      `<i class="fa-thin fa-angle-down d-none d-${mobileNavigationExpandSize}-inline-block"></i>`
+    );
+    $(".dropdown-menu.second-level-dropdown").parent('li:not(".uses-nav-image")').prepend(mobileDropdownArrow);
+  } catch (error) {
+    console.log("Navigation font awesome bullets did not work");
+  }
+}
+
+function FullWidthDropdownOffset() {
+  const firstLevelDropdowns = $(".first-level-dropdown:not(.no-second-level)");
+  const firstLevelDropdownPadding = ($(window).width() - parseInt($(".navigation.container").css("max-width"))) / 2;
+
+  if (CheckMobile()) {
+    $(firstLevelDropdowns).css("top", "");
+    $(firstLevelDropdowns).css("left", "");
+    $(firstLevelDropdowns).css("padding-left", "");
+    $(firstLevelDropdowns).css("padding-right", "");
+  } else {
+    setTimeout(function () {
+      $(firstLevelDropdowns).css("display", "flex");
+      const topBarHeaderHeight = $(".top-bar-header").height();
+      const topBarHeaderTopOffset = $(".top-bar-header").offset().top;
+      $(firstLevelDropdowns).offset({ top: topBarHeaderTopOffset + topBarHeaderHeight - 2, left: 0 });
+      firstLevelDropdownPadding > 0
+        ? $(firstLevelDropdowns).css("padding-left", firstLevelDropdownPadding)
+        : $(firstLevelDropdowns).css("padding-left", "");
+      firstLevelDropdownPadding > 0
+        ? $(firstLevelDropdowns).css("padding-right", firstLevelDropdownPadding)
+        : $(firstLevelDropdowns).css("padding-right", "");
+      $(firstLevelDropdowns).css("display", "");
+    }, 200);
+  }
+}
+
+function AddMobileDropdownArrow() {
+  if (CheckMobile()) {
+    $(".second-level-dropdown").parent("li").addClass("nav-item dropdown");
+    $(".third-level-dropdown").parent("li").addClass("nav-item dropdown");
+    $(".fourth-level-dropdown").parent("li").addClass("nav-item dropdown");
+  } else {
+    $(".second-level-dropdown").parent("li").removeClass("nav-item dropdown");
+    $(".third-level-dropdown").parent("li").removeClass("nav-item dropdown");
+    $(".fourth-level-dropdown").parent("li").removeClass("nav-item dropdown");
+  }
+}
+
+function AddMobileDropdownClass() {
+  if (CheckMobile()) {
+    $(".more-dropdown ul").addClass("first-level-dropdown");
+    $(".first-level-dropdown").addClass("mobile-dropdown");
+    $(".second-level-dropdown").addClass("mobile-dropdown").addClass("dropdown-menu");
+    $(".third-level-dropdown").addClass("mobile-dropdown").show();
+    $(".fourth-level-dropdown").addClass("mobile-dropdown").show();
+    $('.top-level-nav:not(".nav-home-link") .nav-link').removeClass("dropdown-toggle").attr("data-bs-toggle", "");
+  } else {
+    $(".more-dropdown .inside-more-dropdown .mobile-dropdown").css("display", "none");
+    $(".more-dropdown ul").removeClass("first-level-dropdown mobile-dropdown");
+    $(".more-dropdown > ul").css("visibility", "visible");
+    $(".first-level-dropdown").css("visibility", "");
+    $(".second-level-dropdown").css("visibility", "");
+    $(".third-level-dropdown").css("visibility", "");
+    $(".fourth-level-dropdown").css("visibility", "");
+    $(".first-level-dropdown").removeClass("mobile-dropdown").addClass("dropdown-menu");
+    $(".second-level-dropdown").removeClass("mobile-dropdown").removeClass("dropdown-menu");
+    $(".third-level-dropdown").removeClass("mobile-dropdown").addClass("dropdown-menu").hide();
+    $(".fourth-level-dropdown").removeClass("mobile-dropdown").addClass("dropdown-menu").hide();
+    $('.top-level-nav:not(".nav-home-link") .nav-link').addClass("dropdown-toggle").attr("data-bs-toggle", "dropdown");
+  }
+}
+
+// Checks if stringToCheck has any slashes in it. If it does it adds <wbr> after each one and then wraps it all in a span.
+// If stringToCheck doesn't have any slashes it just wraps the string in a span
+function breakOnSlashes(stringToCheck) {
+  if (stringToCheck.includes("/") && (typeof breakSlashes === "undefined" || breakSlashes)) {
+    const stringToCheckBreakSlashes = stringToCheck.replace(/\//g, "/<wbr>");
+    return `<span>${stringToCheckBreakSlashes}</span>`;
+  } else {
+    return `<span>${stringToCheck}</span>`;
+  }
+}
+
+function LoadNavImages() {
+  const navItemsToCheck = $(".dropdown.first-level-nav-item");
+  let navItemsWithImagesCount = 1;
+  const navImageVisitText = "Visit Web Page";
+  $(navItemsToCheck).each(function (index) {
+    const secondLevelNavItems = $(this).children(".first-level-dropdown").children("li");
+    const allNavItemsToCheck = $(secondLevelNavItems).add($(this));
+    let counter = 0;
+    $(allNavItemsToCheck).each(function (index) {
+      const theCurrentItem = $(this);
+      try {
+        const currentLink = $(this).children("a");
+        const currentLinksHREF = $(currentLink).attr("href");
+        const currentLinksText = $(currentLink).text();
+        const currentLinksTextFirstSpace = currentLinksText.indexOf(" ");
+        let currentLinksFirstWord = currentLinksTextFirstSpace === -1 ? currentLinksText : currentLinksText.slice(0, currentLinksTextFirstSpace);
+        let currentLinksOtherWords =
+          currentLinksTextFirstSpace === -1 ? "" : currentLinksText.slice(currentLinksTextFirstSpace + 1, currentLinksText.length);
+        const currentLinksFeaturedPhoto = $(currentLink).attr("data-featured-photo");
+        const currentLinksPageIconPath = $(currentLink).attr("data-page-icon");
+        const currentLinksPageIcon = currentLinksPageIconPath
+          ? `<img src="${currentLinksPageIconPath}" class="page-icon" alt="...">`
+          : `<i class="fa-thin fa-link-horizontal default-nav-icon"></i>`;
+        let currentLinksPageTagline = $(currentLink).attr("data-page-tagline");
+        const navImageDisplayClasses = showMobileNavImages ? "" : "d-none d-md-block";
+        const navImageColorOverlayClass = index === 0 ? "left" : "right";
+        let topNavImageText = currentLinksPageTagline ? currentLinksText : currentLinksFirstWord;
+        currentLinksFirstWord = currentLinksFirstWord && breakOnSlashes(currentLinksFirstWord);
+        currentLinksOtherWords = currentLinksOtherWords && breakOnSlashes(currentLinksOtherWords);
+        topNavImageText = topNavImageText && breakOnSlashes(topNavImageText);
+        currentLinksPageTagline = currentLinksPageTagline && breakOnSlashes(currentLinksPageTagline);
+
+        if (currentLinksFeaturedPhoto) {
+          const currentLinksNewElement = `<a class="dropdown-item nav-image ${navImageDisplayClasses}" href="${currentLinksHREF}" target="_self"><div class="card navigation-image-${navItemsWithImagesCount} nav-image-color-${navImageColorOverlayClass}"><img src="${currentLinksFeaturedPhoto}" class="card-img-top" alt="..."><div class="card-body"><h5 class="card-title">${topNavImageText}${currentLinksPageIcon}</h5><p class="card-text">${
+            currentLinksPageTagline || currentLinksOtherWords
+          }</p><p class="card-text visit-website">${navImageVisitText}<i class="fa-thin fa-arrow-right-long"></i></p></div></div></a>`;
+
+          if ($(theCurrentItem).hasClass("first-level-nav-item")) {
+            const currentLinksNewElementWrapped = `<li class="uses-nav-image first-nav-image"><a class="dropdown-item nav-image ${navImageDisplayClasses}" href="${currentLinksHREF}" target="_self"><div class="card navigation-image-${navItemsWithImagesCount} nav-image-color-${navImageColorOverlayClass}"><img src="${currentLinksFeaturedPhoto}" class="card-img-top" alt="..."><div class="card-body"><h5 class="card-title">${topNavImageText}${currentLinksPageIcon}</h5><p class="card-text">${
+              currentLinksPageTagline || currentLinksOtherWords
+            }</p><p class="card-text visit-website">${navImageVisitText}<i class="fa-thin fa-arrow-right-long"></i></p></div></div></a></li>`;
+            $(theCurrentItem).children(".first-level-dropdown").prepend(currentLinksNewElementWrapped);
+          } else {
+            $(theCurrentItem).prepend(currentLinksNewElement);
+
+            counter === 0 && $(theCurrentItem).addClass("first-nav-image");
+            if (showMobileNavImages) {
+              $(currentLink).addClass("d-none");
+            } else {
+              $(currentLink).addClass("d-block d-md-none");
+            }
+          }
+          $(theCurrentItem).addClass("uses-nav-image");
+          $(currentLink).addClass(`uses-sub-page-nav-image-${navItemsWithImagesCount}`);
+          $(this)
+            .children(".current-page-nav-image")
+            .removeClass("current-page-nav-image")
+            .addClass(`sub-page-nav-image-${navItemsWithImagesCount} loaded-nav-image`)
+            .appendTo(".nav-images .sub-page-nav-images");
+          navItemsWithImagesCount++;
+          counter++;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  });
+}
+
+function NoSubsSingleDropdown() {
+  $(".first-level-dropdown").each(function (index) {
+    if ($(this).find(".second-level-dropdown").length <= 0) {
+      $(this).addClass("no-second-level");
+    }
+  });
+}
+
+function FirstLevelDropdownItemWidths() {
+  const topLevelDropdowns = $(".first-level-dropdown").not(".no-second-level");
+  $(topLevelDropdowns).each(function (index) {
+    const dropdownItems = $(this).children("li");
+    const numberOfDropdownItems = $(dropdownItems).length;
+    const navImages = $(this).children(".uses-nav-image");
+    $(navImages).css("max-width", "25%");
+    const subWidth = 100 / numberOfDropdownItems;
+    CheckMobile() ? $(dropdownItems).css("width", "") : $(dropdownItems).css("width", `${subWidth}%`);
+    if (CheckMobile(375, true)) {
+      $(navImages).css("max-width", "90%");
+    } else if (CheckMobile(425, true)) {
+      $(navImages).css("max-width", "80%");
+    } else if (CheckMobile(700, true)) {
+      $(navImages).css("max-width", "60%");
+    } else if (CheckMobile(992, true)) {
+      $(navImages).css("max-width", "40%");
+    }
+  });
+}
+
+// Moves the topbar right side links into the nav when in mobile (< 992)
+let topBarLinksForNav = $(".top-bar-link");
+
+const topBarLinksForNavFiltered = $(topBarLinksForNav).filter(function (index) {
+  return $(this).find(".schools-dropdown").length <= 0 && $(this).find(".translate-dropdown").length <= 0;
+});
+
+function MoveTopBarLinksToNav() {
+  try {
+    elementEmptyCheck($(".top-bar-link"), "992");
+
+    if (CheckMobile()) {
+      if ($(topBarLinksForNavFiltered).exists()) {
+        $(".navbar .container-fluid").append($(topBarLinksForNavFiltered));
+      }
+    } else if ($(window).width() > 992) {
+      if ($(topBarLinksForNavFiltered).exists()) {
+        $(".top-bar-title-wrapper").after($(topBarLinksForNavFiltered));
+      }
+    }
+  } catch (error) {
+    console.log("Top bar links to under banner did not work");
+  }
+}
+
+function NavImageColorOverlay() {
+  const navImageCards = $(".navbar .card");
+  $(navImageCards).each(function (index) {
+    if ($(this).css("background-color") == "rgba(0, 0, 0, 0)") {
+      $(this).children(".card-img-top").css("opacity", "1");
+    }
+  });
+}
+
+function AddNavTopOnScroll() {
+  const topBar = $(".top-bar-header.home-page");
+  const header = $(topBar).parent("header");
+  const topBarHeader = $(topBar).add($(header));
+  $(topBarHeader).addClass("navTop");
+
+  $(window).scroll(function () {
+    if ($(window).scrollTop() >= 100) {
+      $(topBarHeader).removeClass("navTop");
+    } else {
+      $(topBarHeader).addClass("navTop");
+    }
+  });
+}
+
+function NavTypeClasses() {
+  if (navigationType === navigationTypes.InsideHeader) {
+    if (typeof insideHeaderTransparency === "undefined" || insideHeaderTransparency) {
+      AddNavTopOnScroll();
+    }
+    $(".navigation .navbar-nav").attr("id", "navbarNav");
+    $(".navigation").addClass("inside-header-nav");
+    $(".top-bar-header").addClass("nav-inside");
+    const numberOfTopBarLinks = $(".top-bar-grid .top-bar-logo-container")
+      .add(".top-bar-grid .top-bar-title-wrapper")
+      .add(".top-bar-grid .topbar-contrast-button")
+      .add(".top-bar-grid .top-bar-link").length;
+    document.getElementById("navbarNav").style.gridColumnEnd = numberOfTopBarLinks;
+  }
+
+  if (navigationType === navigationTypes.ElkGrove) {
+    $(".navigation").addClass("elk-grove-nav");
+  }
+}
+
+function addSlashBreaks() {
+  const allLinks = $(".navbar .first-level-dropdown li:not(.uses-nav-image) .dropdown-item");
+  $(allLinks).each(function () {
+    const newHtml = breakOnSlashes($(this).text());
+    $(this).html(newHtml);
+  });
+}
+
+function MoreDropdownPlacement() {
+  try {
+    if (typeof autoMoreDropdownPlacement === "undefined" || autoMoreDropdownPlacement) {
+      const moreDropdown = $(".more-dropdown > .dropdown-menu");
+      const mobileMoreDropdown = $(".more-dropdown > .first-level-dropdown");
+      $(moreDropdown).show();
+      if (!CheckMobile()) {
+        const topbarHeaderBottomBorderWidth = parseInt($(".top-bar-header").css("border-bottom-width"));
+        const moreDropdownTopOffset = $(".navbar-nav").offset().top + ($(".navbar-nav").outerHeight() - topbarHeaderBottomBorderWidth);
+        const moreDropdownLeftOffset = $(window).width() - $(".more-dropdown").offset().left;
+        $(moreDropdown).css("min-width", moreDropdownLeftOffset);
+        $(moreDropdown).offset({ top: moreDropdownTopOffset });
+        placeElementAgainstWindowEdge($(moreDropdown), "right");
+      } else {
+        $(mobileMoreDropdown).removeClass("went-off-right");
+        $(moreDropdown).removeClass("more-auto-placement");
+        $(mobileMoreDropdown).css("left", "");
+        $(mobileMoreDropdown).css("top", "");
+        $(mobileMoreDropdown).css("min-width", "");
+      }
+      $(moreDropdown).css("display", "");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function lastSingleDropdownWidth() {
+  try {
+    const moreDropdown = $(".more-dropdown");
+    const lastNavItem = $(".first-level-nav-item").last();
+    const lastDropdown = $(lastNavItem).children(".first-level-dropdown.no-second-level");
+    $(lastDropdown).css({ left: "", width: "" });
+    $(lastDropdown).find(".dropdown-item").css("white-space", "");
+    if (!CheckMobile()) {
+      if ($(moreDropdown).length && $(lastDropdown).is(":off-right")) {
+        $(lastDropdown).css("width", $(lastDropdown).width() - getOffScreenAmount(lastDropdown));
+        $(lastDropdown).find(".dropdown-item").css("white-space", "normal");
+      } else if ($(lastDropdown).is(":off-right")) {
+        moveOffScreenElementBackOnScreen(lastDropdown);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+$(document).ready(function () {
+  MorePagesInDropdowns();
+  FullWidthDropdownOffset();
+  NavTypeClasses();
+  // CheckSeparateMobileNav();
+  useNavImages && LoadNavImages();
+  FirstLevelDropdownItemWidths();
+  NavigationSocialLinks();
+  AddMobileDropdownArrow();
+  FontAwesomeNavigationBullets();
+  AddMobileDropdownClass();
+  OffCanvasMobileNav();
+  MobileNavInHeader();
+  separateMobileNav && MoveTopBarLinksToNav();
+  MobileNavIconToX();
+  MobilePlacement();
+  typeof breakSlashes === "undefined" || (breakSlashes && addSlashBreaks());
+  NavImageColorOverlay();
+  MoreDropdownPlacement();
+  lastSingleDropdownWidth();
+
+  // Quickly fixing arrows next to links with no dropdowns for now
+  const allTopLevel = $(".first-level-nav-item");
+  $(allTopLevel).each(function () {
+    if ($(this).find(".first-level-dropdown").length <= 0) {
+      $(this).find(".fa-angle-down").remove();
+      $(this).find(".fa-angle-right").remove();
+      $(this).find("a").removeClass("dropdown-toggle");
+      $(this).find("a").attr("data-bs-toggle", "");
+    }
+  });
+});
+
+$(window).debouncedResize(function () {
+  CheckMobile();
+  // CheckSeparateMobileNav();
+  AddMobileDropdownArrow();
+  AddMobileDropdownClass();
+  OffCanvasMobileNav();
+  FirstLevelDropdownItemWidths();
+  separateMobileNav && MoveTopBarLinksToNav();
+  setTimeout(() => {
+    MoreDropdownPlacement();
+  }, 500);
+  FullWidthDropdownOffset();
+  setTimeout(() => {
+    lastSingleDropdownWidth();
+  }, 500);
+  MobilePlacement();
+});
+
+window.addEventListener("load", (event) => {
+  FullWidthDropdownOffset();
+  MoreDropdownPlacement();
+});

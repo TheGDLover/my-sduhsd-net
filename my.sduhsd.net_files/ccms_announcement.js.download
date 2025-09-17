@@ -1,0 +1,53 @@
+﻿function ccmsAnnouncementsLoadEdmbed(viewType, contentHolderId, programUrl, feedList, numberOfItems, blogViewUrl, blogViewUrlText, blogViewUrlPosition, slideDuration, transitionSpeed, authToken, buildForEditor)
+{
+	ccmsAnnouncementsLoadEdmbed(viewType, contentHolderId, programUrl, feedList, numberOfItems, blogViewUrl, blogViewUrlText, blogViewUrlPosition, slideDuration, transitionSpeed, authToken, buildForEditor, "");
+}
+function ccmsAnnouncementsLoadEdmbed(viewType, contentHolderId, programUrl, feedList, numberOfItems, blogViewUrl, blogViewUrlText, blogViewUrlPosition, slideDuration, transitionSpeed, authToken, buildForEditor, shareUrl)
+{
+	var config = {};
+
+	config.View = viewType;
+	config.ContentHolderId = contentHolderId;
+	config.ProgramUrl = programUrl;
+	config.FeedList = feedList;
+	config.AuthorizationToken = authToken;
+
+	if(viewType == "BlogView") { config.BlogViewConfig = { 'InlinePostView': false }; }
+	else
+	{
+		config.DisplayNumberOfItems = numberOfItems;
+		config.BlogViewUrl = blogViewUrl;
+		config.BlogViewUrlText = blogViewUrlText;
+		config.BlogViewUrlPosition = blogViewUrlPosition;
+	}
+
+	if(viewType == "FeedView") { config.FeedViewConfig = { ShowImages: true }; }
+
+	if (viewType == "ScrollView") { config.ScrollViewConfig = { SlideDuration: slideDuration * 1000, TransitionSpeed: transitionSpeed * 1000 }; }
+
+	if (buildForEditor) { config.BlockAlerts = true; }
+
+	if (shareUrl && shareUrl != '') { config.ShareUrl = shareUrl; }
+	try
+	{
+		var item = CatapultAnnouncement(config);
+
+		try
+		{
+			item.registerEvent('finished', function (e)
+			{
+				try
+				{
+					// for Editor only
+					if (ccms_scrollLastWidgetIntoView)
+					{
+						ccms_scrollLastWidgetIntoView();
+					}
+				}
+				catch (ex) { console.log(ex); }
+			});
+		}
+		catch (ex) { console.log(ex); }
+	}
+	catch (ex) { console.log(ex); }
+}

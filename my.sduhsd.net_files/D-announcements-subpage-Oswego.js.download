@@ -1,0 +1,29 @@
+// 22-02-15
+
+function AnnouncementsBackgroundImages() {
+  $('#catapultannounce-content #catapultannounce-postList .announcements-column .card').each(function () {
+    try {
+      const cardImageSource = $(this).children('.card-img-top').attr('src');
+      $(this).css('background-image', `url(${cardImageSource}`);
+    }
+    catch (error) {
+      console.log(error);
+    }
+  });
+}
+
+$(document).ajaxComplete(function (event, xhr, settings) {
+  if (settings.url.includes('announcements.catapultcms.com')) {
+    try {
+      AnnouncementsBackgroundImages();
+      if ($('#catapultannounce-postList .catapultannounce-item .catapultannounce-text .announcements-arrow').length <= 0) {
+
+        $('#catapultannounce-postList .catapultannounce-item .catapultannounce-text').append('<div class="announcements-arrow"><span class="announcements-read-more">READ MORE</span><i class="fa-thin fa-arrow-right-long"></i></div>');
+      }
+      $('.catapultannounce-grid-view .announcements-column').removeAttr('aria-describedby')
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
+});

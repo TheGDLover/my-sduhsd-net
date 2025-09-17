@@ -1,0 +1,79 @@
+//22-02-07
+/* ---------- D Footer Marysville Scripts ---------- */
+
+// Adds Font Awesome Bullets to quicklinks
+function districtComplianceIcons() {
+  try {
+    $('.districtCompliance > ul').addClass('fa-ul');
+    $('.districtCompliance > ul > li').append('<span class="fa-li"><i class="fa-regular fa-arrow-up-right-from-square"></i></span>'
+    );
+  }
+  catch (error) {
+    console.log('District Compliance font awesome icons did not work');
+  }
+}
+
+$(document).ready(districtComplianceIcons);
+
+// Adds Font Awesome Bullets to quicklinks
+function FontAwesomeQuicklinksBullets() {
+  try {
+    $('.quicklinks > ul').addClass('fa-ul');
+    $('.quicklinks > ul > li').prepend('<span class="fa-li"><i class="fa-regular fa-arrow-up-right-from-square"></i></span>'
+    );
+  }
+  catch (error) {
+    console.log('Quicklinks font awesome bullets did not work');
+  }
+}
+
+$(document).ready(sitewideincludes);
+
+// Loads quicklinks from the quicklinks page into .quicklinks
+function sitewideincludes() {
+  try {
+    $('.quicklinks').load('Quicklinks/index.html #container ul', function () {
+      FontAwesomeQuicklinksBullets();
+    });
+  }
+  catch (ex) {
+    console.log('Quicklinks missing.');
+  }
+}
+
+// Removes empty anchors from the footer
+$(function () {
+  try {
+    let footerEmptyLinks = $("footer a[href=''], footer a[href='tel:'], footer a[href='tel:1']");
+    let socialBarEmptyLinks = $(".social-buttons a[href='']");
+    $(footerEmptyLinks).remove();
+    $(socialBarEmptyLinks).remove();
+
+    if (elementEmptyCheck($('.social-bar .social-buttons > a'))) {
+      $('.social-bar').remove();
+    }
+
+    let footerFaxNumber = $('.footer .footer-fax');
+
+    $(footerFaxNumber).each(function () {
+      if ($(this).text().trim() === '' || $(this).text().trim().toLowerCase() === '(fax)') {
+        $(this).remove();
+      }
+    });
+
+    // Adds empty-element class to the footer tagline if it is empty
+    elementEmptyCheck('.tagline');
+
+    $('#footer .footer-social-icons a').each(function () {
+      const footerSocialHref = $(this).attr('href').trim();
+      if (footerSocialHref === '') {
+        $(this).hide();
+      }
+    });
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+
+});

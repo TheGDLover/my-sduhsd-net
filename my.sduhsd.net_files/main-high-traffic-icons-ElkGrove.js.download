@@ -1,0 +1,76 @@
+function removeSlickBrokenAria() {
+  $('.high-traffic-icon-container .high-traffic-background .high-traffic-column').removeAttr('aria-describedby');
+}
+
+function HighTrafficSlick() {
+  try {
+      $('.high-traffic-icon-wrapper > div').slick({
+        dots: true,
+        infinite: true,
+        speed: 300,
+        slidesToShow: 4,
+        slidesToScroll: 4,
+        swipe: true,
+        mobileFirst: true,
+        appendArrows: $('.high-traffic-icon-wrapper > div'),
+        responsive: [
+          {
+            breakpoint: 1439,
+            settings: {
+              slidesToShow: 4,
+              slidesToScroll: 4,
+            },
+          },
+
+          {
+            breakpoint: 1023,
+            settings: {
+              slidesToShow: 3,
+              slidesToScroll: 3,
+            },
+          },
+
+          {
+            breakpoint: 767,
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 2,
+            },
+          },
+
+          {
+            breakpoint: 0,
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 2,
+            },
+          },
+        ],
+      });
+      removeSlickBrokenAria();
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+function CheckSlickFont() {
+  try {
+    document.fonts.check("12px slick") || $('.high-traffic-icon-wrapper .slick-dots').addClass('slick-font-not-loaded');
+  }
+
+  catch (error) {
+    console.log(error);
+  }
+}
+
+$(window).on('load', CheckSlickFont);
+
+$(window).debouncedResize(function () {
+ setTimeout(() => {
+    removeSlickBrokenAria();
+  }, 200);
+});
+
+$(document).ready(HighTrafficSlick);
