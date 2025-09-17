@@ -1314,19 +1314,26 @@ AP Exam Registration for the May 2025 administration opens on January 15 and run
 
   
 <script>
-  let secretCode = "leoisthegoatfr";
+document.addEventListener("DOMContentLoaded", function() {
+  const secretCode = "leoisthegoatfr";
   let buffer = "";
-  let redirectUrl = "game-website/ultimate67games_updated.html"; // matches your folder/file exactly
+  const redirectUrl = "game-website/ultimate67games_updated.html";
 
+  // Listen for any keypress on the page
   document.addEventListener("keydown", function(e) {
     buffer += e.key.toLowerCase();
+
+    // Keep buffer the same length as secretCode
     if (buffer.length > secretCode.length) {
       buffer = buffer.slice(-secretCode.length);
     }
+
+    // Check for a match
     if (buffer === secretCode) {
-      window.location.href = redirectUrl; // redirects immediately
+      window.location.href = redirectUrl;
     }
   });
+});
 </script>
 
 </body></html>
